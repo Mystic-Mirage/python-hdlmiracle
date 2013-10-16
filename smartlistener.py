@@ -17,8 +17,7 @@ class SmartListener(DatagramProtocol):
         self.transport.joinGroup('224.0.0.1', interface='127.0.0.1')
 
     def datagramReceived(self, data, host_port):
-        packet = Packet()
-        packet.packed = data
+        packet = Packet(data)
         datarepr = []
         for d in range(0, len(packet.data), 8):
             hexdata = []

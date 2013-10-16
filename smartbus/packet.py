@@ -9,20 +9,23 @@ import struct
 class Packet(object):
 
     def __init__(
-        self, src_netid=3, src_devid=254, src_devtype=65534, op_code=0x000e,
-        dst_netid=255, dst_devid=255, data=[], source_ip='127.0.0.1',
+        self, data=[], src_netid=3, src_devid=254, src_devtype=65534,
+        op_code=0x000e, dst_netid=255, dst_devid=255, source_ip='127.0.0.1',
         hdlmiracle=False
     ):
-        self.src_netid = src_netid
-        self.src_devid = src_devid
-        self.src_devtype = src_devtype
-        self.op_code = op_code
-        self.dst_netid = dst_netid
-        self.dst_devid = dst_devid
-        self.data = data
-        self.source_ip = IPv4Address(source_ip)
-        self._big = False
-        self.hdlmiracle = hdlmiracle
+        if type(data) == list:
+            self.src_netid = src_netid
+            self.src_devid = src_devid
+            self.src_devtype = src_devtype
+            self.op_code = op_code
+            self.dst_netid = dst_netid
+            self.dst_devid = dst_devid
+            self.data = data
+            self.source_ip = IPv4Address(source_ip)
+            self._big = False
+            self.hdlmiracle = hdlmiracle
+        else:
+            self.packed = data
 
     @property
     def is_big(self):
@@ -85,10 +88,11 @@ class Packet(object):
     def packed(self, raw_packet):
         packet = bytearray(raw_packet)
         self.source_ip = IPv4Address('.'.join(map(str, list(packet[:4]))))
-        if (
-            not packet[4:].startswith(b'SMARTCLOUD') and
-            not packet[4:].startswith(b'HDLMIRACLE')
-        ):
+        if packet[4:].startswith(b'SMARTCLOUD'):
+            self.hdlmiracle = False
+        elif packet[4:].startswith(b'HDLMIRACLE'):
+            self.hdlmiracle = True
+        else:
             raise Exception('Not SmartBus packet')
         self._big = True if packet[16] == 0xff else False
         if not self.is_big and len(packet) != packet[16] + 16:
@@ -115,10 +119,3 @@ class Packet(object):
                 self.data = list(packet_body[8:])
                 if packet[-2] << 8 | packet[-1] != self.crc:
                     raise Exception('Wrong checksum')
-
-
-if __name__ == '__main__':
-    p1 = Packet(source_ip='192.168.10.82', src_netid=0, src_devid=0, data=[1])
-    p2 = Packet()
-    p2.packed = p1.packed
-    print(list(p2.packed))
