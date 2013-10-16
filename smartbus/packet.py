@@ -8,9 +8,11 @@ import struct
 
 class Packet(object):
 
-    def __init__(self, src_netid=3, src_devid=254, src_devtype=65534,
-            op_code=0x000e, dst_netid=255, dst_devid=255, data=[],
-            source_ip='127.0.0.1', hdlmiracle=False):
+    def __init__(
+        self, src_netid=3, src_devid=254, src_devtype=65534, op_code=0x000e,
+        dst_netid=255, dst_devid=255, data=[], source_ip='127.0.0.1',
+        hdlmiracle=False
+    ):
         self.src_netid = src_netid
         self.src_devid = src_devid
         self.src_devtype = src_devtype
@@ -30,9 +32,10 @@ class Packet(object):
     def crc(self):
         src_devtype = bytearray(struct.pack(b'!H', self.src_devtype))
         op_code = bytearray(struct.pack(b'!H', self.op_code))
-        data = ([self.length, self.src_netid, self.src_devid] +
-            list(src_devtype) + list(op_code) +
-            [self.dst_netid, self.dst_devid] + self.data)
+        data = (
+            [self.length, self.src_netid, self.src_devid] + list(src_devtype) +
+            list(op_code) + [self.dst_netid, self.dst_devid] + self.data
+        )
         checksum = 0
         for i in data:
             checksum = checksum ^ (i << 8)
@@ -73,15 +76,19 @@ class Packet(object):
         head = bytearray([0xaa, 0xaa, self.length])
         data = bytearray(self.data)
         crc = bytearray(struct.pack(b'!H', self.crc))
-        return (src_ip + head0 + head + src_id + src_devtype + op_code +
-            dst_id + data + crc)
+        return (
+            src_ip + head0 + head + src_id + src_devtype + op_code + dst_id +
+            data + crc
+        )
 
     @packed.setter
     def packed(self, raw_packet):
         packet = bytearray(raw_packet)
         self.source_ip = IPv4Address('.'.join(map(str, list(packet[:4]))))
-        if (not packet[4:].startswith(b'SMARTCLOUD') and
-            not packet[4:].startswith(b'HDLMIRACLE')):
+        if (
+            not packet[4:].startswith(b'SMARTCLOUD') and
+            not packet[4:].startswith(b'HDLMIRACLE')
+        ):
             raise Exception('Not SmartBus packet')
         self._big = True if packet[16] == 0xff else False
         if not self.is_big and len(packet) != packet[16] + 16:
