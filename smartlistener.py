@@ -26,11 +26,16 @@ class SmartListener(DatagramProtocol):
                 hexdata.append(format(i, '02x'))
                 asciidata.append(chr(i) if i >= 0x20 and i < 0x7f else '.')
             datarepr.append(' '.join(hexdata).ljust(25) + ''.join(asciidata))
-        datarepr_t = (linesep + ' ' * 55).join(datarepr)
-        print('%-3d     %-3d     %-5d     %s   %-3d      %-3d     %s'
-              % (packet.src_netid, packet.src_devid, packet.src_devtype,
-                 packet.op_code_hex, packet.dst_netid, packet.dst_devid,
-                 datarepr_t))
+        datarepr_t = (linesep + ' ' * 53).join(datarepr)
+        print(
+            '{0.src_netid:-3d}     '
+            '{0.src_devid:-3d}     '
+            '{0.src_devtype:-5d}     '
+            '{0.op_code_hex}   '
+            '{0.dst_netid:-3d}      '
+            '{0.dst_devid:-3d}      '
+            '{1}'.format(packet, datarepr_t)
+        )
 
 
 if __name__ == '__main__':
