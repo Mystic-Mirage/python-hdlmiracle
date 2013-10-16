@@ -14,7 +14,7 @@ class SmartListener(DatagramProtocol):
 
     def startProtocol(self):
         print('net_id  dev_id  dev_type  op_code  dst_net  dst_dev  data')
-        self.transport.joinGroup('224.0.0.1', interface='127.0.0.1')
+        self.transport.joinGroup('224.0.0.1')
 
     def datagramReceived(self, data, host_port):
         packet = Packet(data)
