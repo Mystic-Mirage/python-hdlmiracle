@@ -37,3 +37,17 @@ class Listener(Thread):
 
     def stop(self):
         self.exit.set()
+
+
+class Parser(Thread):
+
+    def __init__(self, queue):
+        super().__init__()
+        self.queue = queue
+
+    def run(self):
+        while True:
+            raw_packet = self.queue.get()
+            if raw_packet is None:
+                break
+            print(raw_packet)

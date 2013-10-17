@@ -6,8 +6,11 @@ from future import standard_library  # @UnusedImport
 from queue import Queue  # @UnresolvedImport
 import sys
 
-from .listener import Listener
-from .parser import Parser
+from .workers import Listener, Parser
+
+
+def _module():
+    return sys.modules[__name__.rpartition('.')[0]]
 
 
 def init():
@@ -15,14 +18,18 @@ def init():
     listener = Listener(queue)
     parser = Parser(queue)
 
-    module_obj = sys.modules[__name__.rpartition('.')[0]]
-    setattr(module_obj, 'listener', listener)
-    setattr(module_obj, 'parser', parser)
+    module = _module()
+    setattr(module, 'listener', listener)
+    setattr(module, 'parser', parser)
 
     parser.start()
     listener.start()
 
 
-def quit_():
-    from smartbus import listener
+def quit():  # @ReservedAssignment
+    from . import listener  # @UnresolvedImport
     listener.stop()  # @UndefinedVariable
+
+    module = _module()
+    delattr(module, 'listener')
+    delattr(module, 'parser')
