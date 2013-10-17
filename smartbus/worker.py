@@ -3,15 +3,16 @@ from __future__ import division, print_function, unicode_literals
 from future.builtins import *  # @UnusedWildImport
 from future import standard_library  # @UnusedImport
 
+from queue import Queue  # @UnresolvedImport
 import socket
 from threading import Event, Thread
 
 
-class Listener(Thread):
+class _Listener(Thread):
 
-    def __init__(self, queue, timeout=1):
+    def __init__(self, lp_queue, timeout=1):
         super().__init__()
-        self.queue = queue
+        self.lp_queue = lp_queue
         self.timeout = timeout
         self.exit = Event()
 
@@ -22,32 +23,52 @@ class Listener(Thread):
         sock.settimeout(self.timeout)
         sock.bind(('', 6000))
 
-        while True:
+        while not self.exit.is_set():
             try:
                 raw_packet = sock.recv(2048)
             except:
                 pass
             else:
-                self.queue.put(raw_packet)
-            if self.exit.is_set():
-                break
+                self.lp_queue.put(raw_packet)
 
-        self.queue.put(None)
+        self.lp_queue.put(None)
         sock.close()
 
     def stop(self):
         self.exit.set()
 
 
-class Parser(Thread):
+class _Parser(Thread):
 
-    def __init__(self, queue):
+    def __init__(self, lp_queue, pp_queue):
         super().__init__()
-        self.queue = queue
+        self.lp_queue = lp_queue
+        self.pp_queue = pp_queue
+        self.exit = Event()
 
     def run(self):
-        while True:
-            raw_packet = self.queue.get()
+        while not self.exit.is_set():
+            raw_packet = self.lp_queue.get()
             if raw_packet is None:
                 break
             print(raw_packet)
+
+    def stop(self):
+        self.exit.set()
+
+
+class Worker(object):
+
+    def __init__(self):
+        self.lp_queue = Queue()
+        self.pp_queue = Queue()
+        self.listener = _Listener(self.lp_queue)
+        self.parser = _Parser(self.lp_queue, self.pp_queue)
+
+    def start(self):
+        self.parser.start()
+        self.listener.start()
+
+    def stop(self):
+        self.listener.stop()
+        self.parser.stop()

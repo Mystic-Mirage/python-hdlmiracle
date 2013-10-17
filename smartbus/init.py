@@ -3,10 +3,9 @@ from __future__ import division, print_function, unicode_literals
 from future.builtins import *  # @UnusedWildImport
 from future import standard_library  # @UnusedImport
 
-from queue import Queue  # @UnresolvedImport
 import sys
 
-from .workers import Listener, Parser
+from .worker import Worker
 
 
 def _module():
@@ -14,22 +13,15 @@ def _module():
 
 
 def init():
-    queue = Queue()
-    listener = Listener(queue)
-    parser = Parser(queue)
 
-    module = _module()
-    setattr(module, 'listener', listener)
-    setattr(module, 'parser', parser)
+    worker = Worker()
+    worker.start()
 
-    parser.start()
-    listener.start()
+    setattr(_module(), 'worker', worker)
 
 
 def quit():  # @ReservedAssignment
-    from . import listener  # @UnresolvedImport
-    listener.stop()  # @UndefinedVariable
+    from . import worker  # @UnresolvedImport
+    worker.stop()  # @UndefinedVariable
 
-    module = _module()
-    delattr(module, 'listener')
-    delattr(module, 'parser')
+    delattr(_module(), 'worker')
