@@ -21,6 +21,7 @@ def init():
 
 
 def quit():  # @ReservedAssignment
+
     from . import worker  # @UnresolvedImport
     worker.stop()  # @UndefinedVariable
 
