@@ -87,7 +87,7 @@ class Packet(object):
     @packed.setter
     def packed(self, raw_packet):
         packet = bytearray(raw_packet)
-        self.source_ip = IPv4Address('.'.join(map(str, list(packet[:4]))))
+        self.source_ip = IPv4Address('.'.join(str(x) for x in packet[:4]))
         if packet[4:].startswith(b'SMARTCLOUD'):
             self.hdlmiracle = False
         elif packet[4:].startswith(b'HDLMIRACLE'):
