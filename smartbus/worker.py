@@ -3,7 +3,7 @@ from __future__ import division, print_function, unicode_literals
 from future.builtins import *  # @UnusedWildImport
 from future import standard_library  # @UnusedImport
 
-from queue import Queue  # @UnresolvedImport
+from queue import Queue
 import socket
 from threading import Event, Thread
 
