@@ -40,5 +40,5 @@ class SmartListener(DatagramProtocol):
 
 if __name__ == '__main__':
 
-    reactor.listenMulticast(6000, SmartListener())  # @UndefinedVariable
-    reactor.run()  # @UndefinedVariable
+    reactor.listenMulticast(6000, SmartListener())
+    reactor.run()
