@@ -22,14 +22,10 @@ class Packet(object):
             self.dst_devid = dst_devid
             self.data = data
             self.source_ip = IPv4Address(source_ip)
-            self._big = False
+            self.big = False
             self.hdlmiracle = hdlmiracle
         else:
             self.packed = data
-
-    @property
-    def is_big(self):
-        return self._big
 
     @property
     def crc(self):
@@ -52,7 +48,7 @@ class Packet(object):
 
     @property
     def length(self):
-        return len(self.data) + (10 if self.is_big else 11)
+        return 0xff if self.big else len(self.data) + 11
 
     @property
     def op_code_hex(self):
@@ -78,7 +74,11 @@ class Packet(object):
             head0 = bytearray(b'SMARTCLOUD')
         head = bytearray([0xaa, 0xaa, self.length])
         data = bytearray(self.data)
-        crc = bytearray(struct.pack(b'!H', self.crc))
+        if self.big:
+            crc = bytearray()
+            data = bytearray([len(self.data) + 2]) + data
+        else:
+            crc = bytearray(struct.pack(b'!H', self.crc))
         return (
             src_ip + head0 + head + src_id + src_devtype + op_code + dst_id +
             data + crc
@@ -94,12 +94,12 @@ class Packet(object):
             self.hdlmiracle = True
         else:
             raise Exception('Not SmartBus packet')
-        self._big = True if packet[16] == 0xff else False
-        if not self.is_big and len(packet) != packet[16] + 16:
+        self.big = True if packet[16] == 0xff else False
+        if not self.big and len(packet) != packet[16] + 16:
             raise Exception('Wrong packet length (%s). Expected value is %s'
                             % (packet[16], len(packet)))
         else:
-            if self.is_big:
+            if self.big:
                 packet_body = packet[17:]
             else:
                 packet_body = packet[17:-2]
@@ -109,12 +109,13 @@ class Packet(object):
             self.op_code = packet_body[4] << 8 | packet_body[5]
             self.dst_netid = packet_body[6]
             self.dst_devid = packet_body[7]
-            if self.is_big:
-                big_len = packet_body[8] << 8 | packet_body[9]
+            if self.big:
+                big_len0 = packet_body[8] << 8 | packet_body[9]
+                big_len = len(self.data) + 2
                 self.data = list(bytearray(packet_body[10:]))
-                if big_len != self.length:
+                if big_len0 != big_len:
                     raise Exception('Wrong packet length (%s). Expected %s'
-                                    % (big_len, self.length))
+                                    % (big_len0, big_len))
             else:
                 self.data = list(packet_body[8:])
                 if packet[-2] << 8 | packet[-1] != self.crc:
