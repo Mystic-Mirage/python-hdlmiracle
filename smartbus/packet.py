@@ -9,7 +9,7 @@ import struct
 class Packet(object):
 
     def __init__(
-        self, data=[], src_netid=3, src_devid=254, src_devtype=65534,
+        self, data=bytearray(), src_netid=3, src_devid=254, src_devtype=65534,
         op_code=0x000e, dst_netid=255, dst_devid=255, source_ip='127.0.0.1',
         hdlmiracle=False
     ):
@@ -32,8 +32,11 @@ class Packet(object):
         src_devtype = bytearray(struct.pack(b'!H', self.src_devtype))
         op_code = bytearray(struct.pack(b'!H', self.op_code))
         data = (
-            [self.length, self.src_netid, self.src_devid] + list(src_devtype) +
-            list(op_code) + [self.dst_netid, self.dst_devid] + self.data
+            bytearray([self.length, self.src_netid, self.src_devid]) +
+            src_devtype +
+            op_code +
+            bytearray([self.dst_netid, self.dst_devid]) +
+            self.data
         )
         checksum = 0
         for i in data:
@@ -73,7 +76,7 @@ class Packet(object):
         else:
             head0 = bytearray(b'SMARTCLOUD')
         head = bytearray([0xaa, 0xaa, self.length])
-        data = bytearray(self.data)
+        data = self.data
         if self.big:
             crc = bytearray()
             data = bytearray([len(self.data) + 2]) + data
@@ -112,11 +115,11 @@ class Packet(object):
             if self.big:
                 big_len0 = packet_body[8] << 8 | packet_body[9]
                 big_len = len(self.data) + 2
-                self.data = list(bytearray(packet_body[10:]))
+                self.data = packet_body[10:]
                 if big_len0 != big_len:
                     raise Exception('Wrong packet length (%s). Expected %s'
                                     % (big_len0, big_len))
             else:
-                self.data = list(packet_body[8:])
+                self.data = packet_body[8:]
                 if packet[-2] << 8 | packet[-1] != self.crc:
                     raise Exception('Wrong checksum')
