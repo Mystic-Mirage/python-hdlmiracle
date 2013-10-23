@@ -13,7 +13,9 @@ from smartbus.packet import Packet
 class SmartListener(DatagramProtocol):
 
     def startProtocol(self):
-        print('net_id  dev_id  dev_type  op_code  dst_net  dst_dev  data')
+        print(
+            'netid devid devtype opcode dstnet dstdev hex                     '
+            'ascii')
         self.transport.joinGroup('224.0.0.1')
 
     def datagramReceived(self, data, host_port):
@@ -25,15 +27,15 @@ class SmartListener(DatagramProtocol):
             for i in packet.data[d:d + 8]:
                 hexdata.append(format(i, '02x'))
                 asciidata.append(chr(i) if i >= 0x20 and i < 0x7f else '.')
-            datarepr.append(' '.join(hexdata).ljust(25) + ''.join(asciidata))
-        datarepr_t = (linesep + ' ' * 53).join(datarepr)
+            datarepr.append(' '.join(hexdata).ljust(24) + ''.join(asciidata))
+        datarepr_t = (linesep + ' ' * 41).join(datarepr)
         print(
-            '{0.src_netid:-3d}     '
-            '{0.src_devid:-3d}     '
-            '{0.src_devtype:-5d}     '
-            '{0.op_code_hex}   '
-            '{0.dst_netid:-3d}      '
-            '{0.dst_devid:-3d}      '
+            '{0.src_netid:-3d}   '
+            '{0.src_devid:-3d}   '
+            '{0.src_devtype:-5d}   '
+            '{0.op_code_hex} '
+            '{0.dst_netid:-3d}    '
+            '{0.dst_devid:-3d}    '
             '{1}'.format(packet, datarepr_t)
         )
 
