@@ -17,9 +17,9 @@ if __name__ == '__main__':
     sock.settimeout(1)
     sock.bind(('', 6000))
 
-    print(
-        'netid devid devtype opcode dstnet dstdev hex                     '
-        'ascii')
+    lines = 24
+
+    print('Smart-Bus Listener Started...')
 
     while True:
 
@@ -34,7 +34,18 @@ if __name__ == '__main__':
 
         datarepr = []
 
-        for d in range(0, len(packet.data), 8):
+        packet_len = len(packet.data)
+        packet_lines = divmod(packet_len, 8)
+        lines_p = packet_lines[0] + 1 if packet_lines[1] > 0 else 0
+        lines += lines_p
+
+        if lines > 23:
+            print(
+                'netid devid devtype opcode dstnet dstdev'
+                '           hex              ascii')
+            lines = lines_p + 1
+
+        for d in range(0, packet_len, 8):
             hexdata = []
             asciidata = []
 
@@ -42,18 +53,20 @@ if __name__ == '__main__':
                 hexdata.append(format(i, '02x'))
                 asciidata.append(chr(i) if i >= 0x20 and i < 0x7f else '.')
 
-            datarepr.append(' '.join(hexdata).ljust(24) + ''.join(asciidata))
+            datarepr.append(' '.join(hexdata).ljust(25) + ''.join(asciidata))
 
-        datarepr_t = (linesep + ' ' * 41).join(datarepr)
+        datarepr_t = (linesep + ' ' * 42).join(datarepr)
 
         print(
-            '{0.src_netid:-3d}   '
-            '{0.src_devid:-3d}   '
-            '{0.src_devtype:-5d}   '
+            ' {0.src_netid:-3d}  '
+            ' {0.src_devid:-3d}  '
+            ' {0.src_devtype:-5d}  '
             '{0.op_code_hex} '
-            '{0.dst_netid:-3d}    '
-            '{0.dst_devid:-3d}    '
+            ' {0.dst_netid:-3d}   '
+            ' {0.dst_devid:-3d}    '
             '{1}'.format(packet, datarepr_t)
         )
+
+    print('Smart-Bus Listener Stopped...')
 
     sock.close()
