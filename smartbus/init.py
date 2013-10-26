@@ -4,6 +4,7 @@ from future.builtins import *  # @UnusedWildImport
 
 import sys
 
+from .device import Device
 from .worker import Worker
 
 
@@ -13,9 +14,12 @@ def _module():
 
 def init():
 
+    devices = Device.list
+
     worker = Worker()
     worker.start()
 
+    setattr(_module(), 'devices', devices)
     setattr(_module(), 'worker', worker)
 
 
@@ -24,4 +28,5 @@ def quit():  # @ReservedAssignment
     from . import worker  # @UnresolvedImport
     worker.stop()  # @UndefinedVariable
 
+    delattr(_module(), 'devices')
     delattr(_module(), 'worker')

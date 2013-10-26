@@ -4,46 +4,28 @@ from future.builtins import *  # @UnusedWildImport
 
 from os import linesep
 
-import socket
-
-from smartbus.packet import Packet
+import smartbus
 
 
-if __name__ == '__main__':
+class Listener(smartbus.device.Device):
 
-    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
-    sock.settimeout(1)
-    sock.bind(('', 6000))
+    def __init__(self, *args):
+        super().__init__(self)
+        self.lines = 24
 
-    lines = 24
-
-    print('Smart-Bus Listener Started...')
-
-    while True:
-
-        try:
-            raw_packet = sock.recv(2048)
-        except socket.timeout:
-            continue
-        except KeyboardInterrupt:
-            break
-
-        packet = Packet(raw_packet)
-
+    def receive(self, packet):
         datarepr = []
 
         packet_len = len(packet.data)
         packet_lines = divmod(packet_len, 8)
         lines_p = packet_lines[0] + 1 if packet_lines[1] > 0 else 0
-        lines += lines_p
+        self.lines += lines_p
 
-        if lines > 23:
+        if self.lines > 23:
             print(
                 'netid devid devtype opcode dstnet dstdev'
                 '           hex              ascii')
-            lines = lines_p + 1
+            self.lines = lines_p + 1
 
         for d in range(0, packet_len, 8):
             hexdata = []
@@ -67,6 +49,26 @@ if __name__ == '__main__':
             '{1}'.format(packet, datarepr_t)
         )
 
-    print('Smart-Bus Listener Stopped...')
+    def register(self):
+        super().register()
+        print('Smart-Bus Listener Started...')
 
-    sock.close()
+    def unregister(self):
+        super().unregister()
+        print('Smart-Bus Listener Stopped...')
+
+
+if __name__ == '__main__':
+
+    smartbus.init()
+    listener = Listener()
+    listener.register()
+
+    try:
+        while True:
+            pass
+    except:
+        pass
+
+    listener.unregister()
+    smartbus.quit()

@@ -5,9 +5,9 @@ from future import standard_library  # @UnusedImport
 
 from queue import Empty, Queue
 import socket
-import sqlite3
 from threading import Thread
 
+from .device import Device
 from .packet import Packet
 
 
@@ -47,92 +47,12 @@ class Receiver(Thread):
         self.running = False
 
 
-class Packeter(Thread):
-
-    def put(self, packet):
-        columns = [
-            'src_netid',
-            'src_devid',
-            'src_devtype',
-            'op_code',
-            'dst_netid',
-            'dst_devid',
-            'data',
-            'source_ip',
-            'big',
-            'hdlmiracle',
-        ]
-        c_names = ', '.join(columns)
-        values = ', '.join([':{}'.format(c) for c in columns])
-        self.queue.put((
-            'INSERT INTO packets ({0}) VALUES ({1})'.format(c_names, values),
-            {
-                'src_netid': packet.src_netid,
-                'src_devid': packet.src_devid,
-                'src_devtype': packet.src_devtype,
-                'op_code': packet.op_code,
-                'dst_netid': packet.dst_netid,
-                'dst_devid': packet.dst_devid,
-                'data': sqlite3.Binary(packet.data),
-                'source_ip': packet.source_ip.compressed,
-                'big': packet.big,
-                'hdlmiracle': packet.hdlmiracle
-            },
-            None
-        ))
-
-    def run(self):
-        self.queue = Queue()
-
-        connection = sqlite3.connect(':memory:')
-        cursor = connection.cursor()
-
-        columns = [
-            'id INTEGER PRIMARY KEY',
-            'src_netid TINYINT',
-            'src_devid TINYINT',
-            'src_devtype SMALLINT',
-            'op_code SMALLINT',
-            'dst_netid TINYINT',
-            'dst_devid TINYINT',
-            'data BLOB',
-            'source_ip TEXT',
-            'big BOOLEAN',
-            'hdlmiracle BOOLEAN',
-            'timestamp DATETIME DEFAULT CURRENT_TIMESTAMP',
-        ]
-
-        cursor.execute(
-            'CREATE TABLE packets ({})'.format(', '.join(columns))
-        )
-
-        self.running = True
-
-        while self.running:
-            try:
-                req, args, res = self.queue.get_nowait()
-            except Empty:
-                continue
-            cursor.execute(req, args)
-            if res is not None:
-                for i in cursor:
-                    print(i)
-
-        connection.close()
-
-    def select_all(self):
-        self.queue.put(('SELECT * FROM packets', (), ''))
-
-    def stop(self):
-        self.running = False
-
-
 class Parser(Thread):
 
-    def __init__(self, packeter, receiver):
+    def __init__(self, receiver, device_list):
         super().__init__()
         self.receiver = receiver
-        self.packeter = packeter
+        self.device_list = device_list
 
     def run(self):
         self.running = True
@@ -140,7 +60,8 @@ class Parser(Thread):
         while self.running:
             raw_packet = self.receiver.get_nowait()
             if raw_packet is not None:
-                self.packeter.put(Packet(raw_packet))
+                for d in self.device_list:
+                    d.receive(Packet(raw_packet))
 
     def stop(self):
         self.running = False
@@ -150,15 +71,12 @@ class Worker(object):
 
     def __init__(self):
         self.receiver = Receiver()
-        self.packeter = Packeter()
-        self.parser = Parser(self.packeter, self.receiver)
+        self.parser = Parser(self.receiver, Device.list)
 
     def start(self):
         self.receiver.start()
-        self.packeter.start()
         self.parser.start()
 
     def stop(self):
         self.receiver.stop()
-        self.packeter.stop()
         self.parser.stop()
