@@ -58,7 +58,7 @@ class Parser(Thread):
         self.running = True
 
         while self.running:
-            raw_packet = self.receiver.get_nowait()
+            raw_packet = self.receiver.get(timeout=1)
             if raw_packet is not None:
                 for d in self.device_list:
                     d.receive(Packet(raw_packet))

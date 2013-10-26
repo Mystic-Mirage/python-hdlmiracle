@@ -3,6 +3,7 @@ from __future__ import division, print_function, unicode_literals
 from future.builtins import *  # @UnusedWildImport
 
 from os import linesep
+from time import sleep
 
 import smartbus
 
@@ -66,9 +67,11 @@ if __name__ == '__main__':
 
     try:
         while True:
-            pass
-    except:
+            sleep(1)
+    except KeyboardInterrupt:
         pass
+    except:
+        raise
 
     listener.unregister()
     smartbus.quit()
