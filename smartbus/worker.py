@@ -11,6 +11,26 @@ from .device import Device
 from .packet import Packet
 
 
+class Distributor(Thread):
+
+    def __init__(self, receiver, device_list):
+        super().__init__()
+        self.receiver = receiver
+        self.device_list = device_list
+
+    def run(self):
+        self.running = True
+
+        while self.running:
+            raw_packet = self.receiver.get(timeout=1)
+            if raw_packet is not None:
+                for d in self.device_list:
+                    d.receive(Packet(raw_packet))
+
+    def stop(self):
+        self.running = False
+
+
 class Receiver(Thread):
 
     def get(self, block=True, timeout=None):
@@ -47,31 +67,11 @@ class Receiver(Thread):
         self.running = False
 
 
-class Parser(Thread):
-
-    def __init__(self, receiver, device_list):
-        super().__init__()
-        self.receiver = receiver
-        self.device_list = device_list
-
-    def run(self):
-        self.running = True
-
-        while self.running:
-            raw_packet = self.receiver.get(timeout=1)
-            if raw_packet is not None:
-                for d in self.device_list:
-                    d.receive(Packet(raw_packet))
-
-    def stop(self):
-        self.running = False
-
-
 class Worker(object):
 
     def __init__(self):
         self.receiver = Receiver()
-        self.parser = Parser(self.receiver, Device.list)
+        self.parser = Distributor(self.receiver, Device.list)
 
     def start(self):
         self.receiver.start()
