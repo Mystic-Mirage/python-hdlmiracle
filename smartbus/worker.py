@@ -71,12 +71,12 @@ class Worker(object):
 
     def __init__(self):
         self.receiver = Receiver()
-        self.parser = Distributor(self.receiver, Device.list)
+        self.distributor = Distributor(self.receiver, Device.list)
 
     def start(self):
         self.receiver.start()
-        self.parser.start()
+        self.distributor.start()
 
     def stop(self):
         self.receiver.stop()
-        self.parser.stop()
+        self.distributor.stop()
