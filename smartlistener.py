@@ -50,20 +50,12 @@ class Listener(smartbus.device.Device):
             '{1}'.format(packet, datarepr_t)
         )
 
-    def register(self):
-        super().register()
-        print('Smart-Bus Listener Started...')
-
-    def unregister(self):
-        super().unregister()
-        print('Smart-Bus Listener Stopped...')
-
-
 if __name__ == '__main__':
 
     smartbus.init()
     listener = Listener()
-    listener.register()
+
+    print('Smart-Bus Listener Started...')
 
     try:
         while True:
@@ -73,5 +65,6 @@ if __name__ == '__main__':
     except:
         raise
 
-    listener.unregister()
+    print('Smart-Bus Listener Stopped...')
+
     smartbus.quit()
