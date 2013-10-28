@@ -1,16 +1,48 @@
 from __future__ import absolute_import
 from __future__ import division, print_function, unicode_literals
 from future.builtins import *  # @UnusedWildImport
+from future.utils import with_metaclass
 
 from ipaddress import IPv4Address
 import struct
 
 
-class Packet(object):
+class _ClassProperty(object):
+
+    def __init__(self, getter, setter):
+        self.getter = getter
+        self.setter = setter
+
+    def __get__(self, cls, owner):
+        return getattr(cls, self.getter)()
+
+    def __set__(self, cls, value):
+        getattr(cls, self.setter)(value)
+
+
+class _SourceIPMeta(type):
+
+    source_ip = _ClassProperty('_get_source_ip', '_set_source_ip')
+
+
+class Packet(with_metaclass(_SourceIPMeta, object)):
+
+    _source_ip = IPv4Address('127.0.0.1')
+
+    @classmethod
+    def _get_source_ip(cls):
+        return cls._source_ip
+
+    @classmethod
+    def _set_source_ip(cls, ip):
+        if type(ip) == IPv4Address:
+            cls._source_ip = ip
+        else:
+            cls._source_ip = IPv4Address(ip)
 
     def __init__(
         self, data=bytearray(), src_netid=3, src_devid=254, src_devtype=65534,
-        op_code=0x000e, dst_netid=255, dst_devid=255, source_ip='127.0.0.1',
+        op_code=0x000e, dst_netid=255, dst_devid=255, source_ip=None,
         hdlmiracle=False
     ):
         if type(data) == bytearray:
@@ -21,7 +53,8 @@ class Packet(object):
             self.dst_netid = dst_netid
             self.dst_devid = dst_devid
             self.data = data
-            self.source_ip = IPv4Address(source_ip)
+            if source_ip is not None:
+                self.source_ip = source_ip
             self.big = False
             self.hdlmiracle = hdlmiracle
         else:
@@ -123,3 +156,14 @@ class Packet(object):
                 self.data = packet_body[8:]
                 if packet[-2] << 8 | packet[-1] != self.crc:
                     raise Exception('Wrong checksum')
+
+    @property
+    def source_ip(self):
+        return self._source_ip
+
+    @source_ip.setter
+    def source_ip(self, ip):
+        if type(ip) == IPv4Address:
+            self._source_ip = ip
+        else:
+            self._source_ip = IPv4Address(ip)
