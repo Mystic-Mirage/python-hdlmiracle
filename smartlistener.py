@@ -10,7 +10,7 @@ import smartbus
 
 class Listener(smartbus.device.Device):
 
-    def __init__(self, *args):
+    def __init__(self):
         super().__init__(self)
         self.lines = 24
 
@@ -49,6 +49,7 @@ class Listener(smartbus.device.Device):
             ' {0.dst_devid:-3d}    '
             '{1}'.format(packet, datarepr_t)
         )
+
 
 if __name__ == '__main__':
 
