@@ -13,7 +13,7 @@ class Packet(object):
         op_code=0x000e, dst_netid=255, dst_devid=255, source_ip='127.0.0.1',
         hdlmiracle=False
     ):
-        if type(data) == list:
+        if type(data) == bytearray:
             self.src_netid = src_netid
             self.src_devid = src_devid
             self.src_devtype = src_devtype
