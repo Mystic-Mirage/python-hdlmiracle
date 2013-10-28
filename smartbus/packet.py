@@ -99,8 +99,8 @@ class Packet(object):
             raise Exception('Not SmartBus packet')
         self.big = True if packet[16] == 0xff else False
         if not self.big and len(packet) != packet[16] + 16:
-            raise Exception('Wrong packet length (%s). Expected value is %s'
-                            % (packet[16], len(packet)))
+            raise Exception('Wrong packet length ({0}). '
+                'Expected value is {1}'.format(packet[16], len(packet)))
         else:
             if self.big:
                 packet_body = packet[17:]
@@ -117,8 +117,8 @@ class Packet(object):
                 big_len = len(self.data) + 2
                 self.data = packet_body[10:]
                 if big_len0 != big_len:
-                    raise Exception('Wrong packet length (%s). Expected %s'
-                                    % (big_len0, big_len))
+                    raise Exception('Wrong packet length ({0}). '
+                        'Expected {1}'.format(big_len0, big_len))
             else:
                 self.data = packet_body[8:]
                 if packet[-2] << 8 | packet[-1] != self.crc:
