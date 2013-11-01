@@ -1,13 +1,12 @@
 from __future__ import absolute_import
 from __future__ import division, print_function, unicode_literals
-from future.builtins import *  # @UnusedWildImport
-from future import standard_library  # @UnusedImport
+from future.builtins import *
+from future import standard_library
 
 from queue import Empty, Queue
 import socket
 from threading import Thread
 
-from .device import Device
 from .packet import Packet
 
 
@@ -22,10 +21,14 @@ class Distributor(Thread):
         self.running = True
 
         while self.running:
-            raw_packet = self.receiver.get(timeout=1)
-            if raw_packet is not None:
-                for d in self.device_list:
-                    d.receive(Packet(raw_packet))
+            try:
+                raw_packet = self.receiver.get(timeout=1)
+            except Empty:
+                pass
+            else:
+                if raw_packet is not None:
+                    for device in self.device_list:
+                        device.receive(Packet(raw_packet))
 
     def stop(self):
         self.running = False
@@ -34,10 +37,7 @@ class Distributor(Thread):
 class Receiver(Thread):
 
     def get(self, block=True, timeout=None):
-        try:
-            return self.queue.get(block, timeout)
-        except Empty:
-            return None
+        return self.queue.get(block, timeout)
 
     def get_nowait(self):
         return self.get(False)
@@ -67,16 +67,32 @@ class Receiver(Thread):
         self.running = False
 
 
-class Worker(object):
+class Sender(Thread):
 
-    def __init__(self):
-        self.receiver = Receiver()
-        self.distributor = Distributor(self.receiver, Device.list)
+    def put(self, value):
+        self.queue.put(value)
 
-    def start(self):
-        self.receiver.start()
-        self.distributor.start()
+    def run(self):
+        self.queue = Queue()
+
+        sock = socket.socket(
+            socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP
+        )
+        sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
+
+        self.running = True
+
+        while self.running:
+            try:
+                packet = self.queue.get(timeout=1)
+            except socket.timeout:
+                pass
+            except Empty:
+                pass
+            else:
+                sock.sendto(packet.packed, ('<broadcast>', 6000))
+
+        sock.close()
 
     def stop(self):
-        self.receiver.stop()
-        self.distributor.stop()
+        self.running = False

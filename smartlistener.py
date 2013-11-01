@@ -1,6 +1,6 @@
 from __future__ import absolute_import
 from __future__ import division, print_function, unicode_literals
-from future.builtins import *  # @UnusedWildImport
+from future.builtins import *
 
 from os import linesep
 from time import sleep
@@ -25,7 +25,8 @@ class Listener(smartbus.device.Device):
         if self.lines > 23:
             print(
                 'netid devid devtype opcode dstnet dstdev'
-                '           hex              ascii')
+                '           hex              ascii'
+            )
             self.lines = lines_p + 1
 
         for d in range(0, packet_len, 8):

@@ -1,10 +1,9 @@
 from __future__ import absolute_import
 from __future__ import division, print_function, unicode_literals
-from future.builtins import *  # @UnusedWildImport
+from future.builtins import *
 
 
 class Device(object):
-
     list = []
 
     def __init__(self, net_id=255, dev_id=255, dev_type=0, register=True):

@@ -1,11 +1,11 @@
 from __future__ import absolute_import
 from __future__ import division, print_function, unicode_literals
-from future.builtins import *  # @UnusedWildImport
+from future.builtins import *
 
 import sys
 
 from .device import Device
-from .worker import Worker
+from .handler import Distributor, Receiver, Sender
 
 
 def _module():
@@ -13,20 +13,30 @@ def _module():
 
 
 def init():
+    device_list = Device.list
 
-    devices = Device.list
+    receiver = Receiver()
+    sender = Sender()
+    distributor = Distributor(receiver, device_list)
 
-    worker = Worker()
-    worker.start()
+    receiver.start()
+    sender.start()
+    distributor.start()
 
-    setattr(_module(), 'devices', devices)
-    setattr(_module(), 'worker', worker)
+    setattr(_module(), 'device_list', device_list)
+    setattr(_module(), 'receiver', receiver)
+    setattr(_module(), 'sender', sender)
+    setattr(_module(), 'distributor', distributor)
 
 
-def quit():  # @ReservedAssignment
+def quit():
+    from . import receiver, sender, distributor
 
-    from . import worker  # @UnresolvedImport
-    worker.stop()  # @UndefinedVariable
+    receiver.stop()
+    sender.stop()
+    distributor.stop()
 
-    delattr(_module(), 'devices')
-    delattr(_module(), 'worker')
+    delattr(_module(), 'device_list')
+    delattr(_module(), 'receiver')
+    delattr(_module(), 'sender')
+    delattr(_module(), 'distributor')
