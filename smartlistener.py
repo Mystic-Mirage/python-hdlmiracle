@@ -25,7 +25,8 @@ class Listener(smartbus.device.Device):
         if self.lines > 23:
             print(
                 'netid devid devtype opcode dstnet dstdev'
-                '           hex              ascii')
+                '           hex              ascii'
+            )
             self.lines = lines_p + 1
 
         for d in range(0, packet_len, 8):
