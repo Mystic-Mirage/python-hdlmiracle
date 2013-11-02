@@ -52,7 +52,7 @@ class Listener(smartbus.device.Device):
         )
 
 
-if __name__ == '__main__':
+def main():
 
     smartbus.init()
     listener = Listener()
@@ -70,3 +70,7 @@ if __name__ == '__main__':
     print('Smart-Bus Listener Stopped...')
 
     smartbus.quit()
+
+
+if __name__ == '__main__':
+    main()
