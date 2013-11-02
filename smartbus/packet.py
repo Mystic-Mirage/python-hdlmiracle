@@ -27,7 +27,7 @@ class _SourceIPMeta(type):
 
 class Packet(with_metaclass(_SourceIPMeta, object)):
 
-    src_netid = 3
+    src_netid = 254
     src_devid = 254
     src_devtype = 65534
     _source_ip = IPv4Address('127.0.0.1')
