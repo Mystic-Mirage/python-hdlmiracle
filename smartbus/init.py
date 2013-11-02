@@ -37,6 +37,10 @@ def quit():
     sender.stop()
     distributor.stop()
 
+    receiver.join()
+    sender.join()
+    distributor.join()
+
     delattr(_module(), 'device_list')
     delattr(_module(), 'receiver')
     delattr(_module(), 'sender')
