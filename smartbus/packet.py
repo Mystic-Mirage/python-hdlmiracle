@@ -22,7 +22,7 @@ class _ClassProperty(object):
 
 class _SourceIPMeta(type):
 
-    source_ip = _ClassProperty('_get_source_ip', '_set_source_ip')
+    src_ipaddress = _ClassProperty('_get_src_ipaddress', '_set_src_ipaddress')
 
 
 class Packet(with_metaclass(_SourceIPMeta, object)):
@@ -30,38 +30,38 @@ class Packet(with_metaclass(_SourceIPMeta, object)):
     src_netid = 254
     src_devid = 254
     src_devtype = 65534
-    _source_ip = IPv4Address('127.0.0.1')
+    _src_ipaddress = IPv4Address('127.0.0.1')
 
     @classmethod
-    def _get_source_ip(cls):
-        return cls._source_ip
+    def _get_src_ipaddress(cls):
+        return cls._src_ipaddress
 
     @classmethod
-    def _set_source_ip(cls, ip):
-        if type(ip) == IPv4Address:
-            cls._source_ip = ip
+    def _set_src_ipaddress(cls, ipaddress):
+        if type(ipaddress) == IPv4Address:
+            cls._src_ipaddress = ipaddress
         else:
-            cls._source_ip = IPv4Address(ip)
+            cls._src_ipaddress = IPv4Address(ipaddress)
 
     def __init__(
         self, data=bytearray(),
-        op_code=0x000e, dst_netid=255, dst_devid=255,
+        opcode=0x000e, netid=255, devid=255,
         src_netid=None, src_devid=None, src_devtype=None,
-        source_ip=None, hdlmiracle=False
+        src_ipaddress=None, hdlmiracle=False
     ):
         if type(data) == bytearray:
             self.data = data
-            self.op_code = op_code
-            self.dst_netid = dst_netid
-            self.dst_devid = dst_devid
+            self.opcode = opcode
+            self.netid = netid
+            self.devid = devid
             if src_netid is not None:
                 self.src_netid = src_netid
             if src_devid is not None:
                 self.src_devid = src_devid
             if src_devtype is not None:
                 self.src_devtype = src_devtype
-            if source_ip is not None:
-                self.source_ip = source_ip
+            if src_ipaddress is not None:
+                self.src_ipaddress = src_ipaddress
             self.big = False
             self.hdlmiracle = hdlmiracle
         else:
@@ -69,17 +69,15 @@ class Packet(with_metaclass(_SourceIPMeta, object)):
 
     @property
     def crc(self):
-        src_devtype = bytearray(struct.pack(b'!H', self.src_devtype))
-        op_code = bytearray(struct.pack(b'!H', self.op_code))
-        data = (
+        packet_array = (
             bytearray([self.length, self.src_netid, self.src_devid]) +
-            src_devtype +
-            op_code +
-            bytearray([self.dst_netid, self.dst_devid]) +
+            bytearray(struct.pack(b'!H', self.src_devtype)) +
+            bytearray(struct.pack(b'!H', self.opcode)) +
+            bytearray([self.netid, self.devid]) +
             self.data
         )
         checksum = 0
-        for i in data:
+        for i in packet_array:
             checksum = checksum ^ (i << 8)
             for _ in range(8):
                 if (checksum & 0x8000) > 0:
@@ -94,23 +92,23 @@ class Packet(with_metaclass(_SourceIPMeta, object)):
         return 0xff if self.big else len(self.data) + 11
 
     @property
-    def op_code_hex(self):
-        return format(self.op_code, '#06x')
+    def opcode_hex(self):
+        return format(self.opcode, '#06x')
 
-    @op_code_hex.setter
-    def op_code_hex(self, value):
+    @opcode_hex.setter
+    def opcode_hex(self, value):
         if type(value) is int:
-            self.op_code = value
+            self.opcode = value
         else:
-            self.op_code = int(value, 16)
+            self.opcode = int(value, 16)
 
     @property
     def packed(self):
-        src_ip = bytearray(self.source_ip.packed)
-        src_id = bytearray([self.src_netid, self.src_devid])
+        src_ipaddress = bytearray(self.src_ipaddress.packed)
+        src = bytearray([self.src_netid, self.src_devid])
         src_devtype = bytearray(struct.pack(b'!H', self.src_devtype))
-        op_code = bytearray(struct.pack(b'!H', self.op_code))
-        dst_id = bytearray([self.dst_netid, self.dst_devid])
+        opcode = bytearray(struct.pack(b'!H', self.opcode))
+        dst = bytearray([self.netid, self.devid])
         if self.hdlmiracle:
             head0 = bytearray(b'HDLMIRACLE')
         else:
@@ -123,14 +121,14 @@ class Packet(with_metaclass(_SourceIPMeta, object)):
         else:
             crc = bytearray(struct.pack(b'!H', self.crc))
         return (
-            src_ip + head0 + head + src_id + src_devtype + op_code + dst_id +
+            src_ipaddress + head0 + head + src + src_devtype + opcode + dst +
             data + crc
         )
 
     @packed.setter
     def packed(self, raw_packet):
         packet = bytearray(raw_packet)
-        self.source_ip = IPv4Address('.'.join(str(x) for x in packet[:4]))
+        self.src_ipaddress = IPv4Address('.'.join(str(x) for x in packet[:4]))
         if packet[4:].startswith(b'SMARTCLOUD'):
             self.hdlmiracle = False
         elif packet[4:].startswith(b'HDLMIRACLE'):
@@ -151,9 +149,9 @@ class Packet(with_metaclass(_SourceIPMeta, object)):
             self.src_netid = packet_body[0]
             self.src_devid = packet_body[1]
             self.src_devtype = packet_body[2] << 8 | packet_body[3]
-            self.op_code = packet_body[4] << 8 | packet_body[5]
-            self.dst_netid = packet_body[6]
-            self.dst_devid = packet_body[7]
+            self.opcode = packet_body[4] << 8 | packet_body[5]
+            self.netid = packet_body[6]
+            self.devid = packet_body[7]
             if self.big:
                 big_len0 = packet_body[8] << 8 | packet_body[9]
                 big_len = len(self.data) + 2
@@ -169,12 +167,12 @@ class Packet(with_metaclass(_SourceIPMeta, object)):
                     raise Exception('Wrong checksum')
 
     @property
-    def source_ip(self):
-        return self._source_ip
+    def src_ipaddress(self):
+        return self._src_ipaddress
 
-    @source_ip.setter
-    def source_ip(self, ip):
-        if type(ip) == IPv4Address:
-            self._source_ip = ip
+    @src_ipaddress.setter
+    def src_ipaddress(self, ipaddress):
+        if type(ipaddress) == IPv4Address:
+            self._src_ipaddress = ipaddress
         else:
-            self._source_ip = IPv4Address(ip)
+            self._src_ipaddress = IPv4Address(ipaddress)

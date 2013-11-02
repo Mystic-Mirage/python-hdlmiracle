@@ -44,9 +44,9 @@ class Listener(smartbus.Device):
             ' {0.src_netid:-3d}  '
             ' {0.src_devid:-3d}  '
             ' {0.src_devtype:-5d}  '
-            '{0.op_code_hex} '
-            ' {0.dst_netid:-3d}   '
-            ' {0.dst_devid:-3d}    '
+            '{0.opcode_hex} '
+            ' {0.netid:-3d}   '
+            ' {0.devid:-3d}    '
             '{1}'.format(packet, datarepr_t)
         )
 
