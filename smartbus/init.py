@@ -5,7 +5,7 @@ from future.builtins import *
 import sys
 
 from .device import Device
-from .handler import Distributor, Receiver, Sender
+from .handle import Distributor, Receiver, Sender
 
 
 def _module():
