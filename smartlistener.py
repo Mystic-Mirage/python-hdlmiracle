@@ -53,10 +53,8 @@ class Listener(smartbus.device.Device):
 
 
 def main():
-
     smartbus.init()
     listener = Listener()
-
     print('Smart-Bus Listener Started...')
 
     try:
@@ -67,9 +65,8 @@ def main():
     except:
         raise
 
-    print('Smart-Bus Listener Stopped...')
-
     smartbus.quit()
+    print('Smart-Bus Listener Stopped...')
 
 
 if __name__ == '__main__':
