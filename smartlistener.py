@@ -10,11 +10,11 @@ import smartbus
 
 class Listener(smartbus.device.Device):
 
-    def __init__(self):
-        super().__init__(self)
+    def __init__(self, **kwargs):
+        super().__init__(self, **kwargs)
         self.lines = 24
 
-    def receive(self, packet):
+    def receive_func(self, packet):
         datarepr = []
         packet_len = len(packet.data)
         packet_lines = divmod(packet_len, 8)
