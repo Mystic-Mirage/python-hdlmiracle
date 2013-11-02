@@ -27,6 +27,7 @@ def init():
     setattr(_module(), 'receiver', receiver)
     setattr(_module(), 'sender', sender)
     setattr(_module(), 'distributor', distributor)
+    setattr(_module(), 'send', sender.put)
 
 
 def quit():
@@ -40,3 +41,4 @@ def quit():
     delattr(_module(), 'receiver')
     delattr(_module(), 'sender')
     delattr(_module(), 'distributor')
+    delattr(_module(), 'send')

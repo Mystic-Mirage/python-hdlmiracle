@@ -1,6 +1,6 @@
 from __future__ import absolute_import
 from __future__ import division, print_function, unicode_literals
-from future.builtins import *  # @UnusedWildImport
+from future.builtins import *
 from future.utils import with_metaclass
 
 from ipaddress import IPv4Address
