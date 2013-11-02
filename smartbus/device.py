@@ -29,15 +29,6 @@ devices = {
 class Device(object):
     list = []
 
-    def __init__(
-        self, devtype=None, netid=None, devid=None, register=True
-    ):
-        self._devtype = devtype
-        self.netid = netid
-        self.devid = devid
-        if register:
-            self.register()
-
     @classmethod
     def append(cls, device):
         if device not in cls.list:
@@ -51,6 +42,15 @@ class Device(object):
             cls.list.remove(device)
         else:
             raise Exception('Device not registered')
+
+    def __init__(
+        self, devtype=None, netid=None, devid=None, register=True
+    ):
+        self._devtype = devtype
+        self.netid = netid
+        self.devid = devid
+        if register:
+            self.register()
 
     @property
     def devtype(self):
