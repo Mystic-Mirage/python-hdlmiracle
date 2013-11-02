@@ -27,6 +27,9 @@ class _SourceIPMeta(type):
 
 class Packet(with_metaclass(_SourceIPMeta, object)):
 
+    src_netid = 3
+    src_devid = 254
+    src_devtype = 65534
     _source_ip = IPv4Address('127.0.0.1')
 
     @classmethod
@@ -41,18 +44,22 @@ class Packet(with_metaclass(_SourceIPMeta, object)):
             cls._source_ip = IPv4Address(ip)
 
     def __init__(
-        self, data=bytearray(), src_netid=3, src_devid=254, src_devtype=65534,
-        op_code=0x000e, dst_netid=255, dst_devid=255, source_ip=None,
-        hdlmiracle=False
+        self, data=bytearray(),
+        op_code=0x000e, dst_netid=255, dst_devid=255,
+        src_netid=None, src_devid=None, src_devtype=None,
+        source_ip=None, hdlmiracle=False
     ):
         if type(data) == bytearray:
-            self.src_netid = src_netid
-            self.src_devid = src_devid
-            self.src_devtype = src_devtype
+            self.data = data
             self.op_code = op_code
             self.dst_netid = dst_netid
             self.dst_devid = dst_devid
-            self.data = data
+            if src_netid is not None:
+                self.src_netid = src_netid
+            if src_devid is not None:
+                self.src_devid = src_devid
+            if src_devtype is not None:
+                self.src_devtype = src_devtype
             if source_ip is not None:
                 self.source_ip = source_ip
             self.big = False
@@ -132,8 +139,10 @@ class Packet(with_metaclass(_SourceIPMeta, object)):
             raise Exception('Not SmartBus packet')
         self.big = True if packet[16] == 0xff else False
         if not self.big and len(packet) != packet[16] + 16:
-            raise Exception('Wrong packet length ({0}). '
-                'Expected value is {1}'.format(packet[16], len(packet)))
+            raise Exception(
+                'Wrong packet length ({0}). '
+                'Expected value is {1}'.format(packet[16], len(packet))
+            )
         else:
             if self.big:
                 packet_body = packet[17:]
@@ -150,8 +159,10 @@ class Packet(with_metaclass(_SourceIPMeta, object)):
                 big_len = len(self.data) + 2
                 self.data = packet_body[10:]
                 if big_len0 != big_len:
-                    raise Exception('Wrong packet length ({0}). '
-                        'Expected {1}'.format(big_len0, big_len))
+                    raise Exception(
+                        'Wrong packet length ({0}). '
+                        'Expected {1}'.format(big_len0, big_len)
+                    )
             else:
                 self.data = packet_body[8:]
                 if packet[-2] << 8 | packet[-1] != self.crc:
