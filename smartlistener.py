@@ -8,7 +8,7 @@ from time import sleep
 import smartbus
 
 
-class Listener(smartbus.device.Device):
+class Listener(smartbus.Device):
 
     def __init__(self, **kwargs):
         super().__init__(self, **kwargs)
