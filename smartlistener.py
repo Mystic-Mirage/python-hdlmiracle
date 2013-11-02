@@ -16,7 +16,6 @@ class Listener(smartbus.device.Device):
 
     def receive(self, packet):
         datarepr = []
-
         packet_len = len(packet.data)
         packet_lines = divmod(packet_len, 8)
         lines_p = packet_lines[0] + 1 if packet_lines[1] > 0 else 0
