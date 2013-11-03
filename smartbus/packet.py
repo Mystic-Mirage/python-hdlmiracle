@@ -6,6 +6,12 @@ from future.utils import with_metaclass
 from ipaddress import IPv4Address
 import struct
 
+from .opcode import OC_SEARCH
+
+
+All_NETWORKS = 255
+ALL_DEVICES = 255
+
 
 class _ClassProperty(object):
 
@@ -21,12 +27,10 @@ class _ClassProperty(object):
 
 
 class _SourceIPMeta(type):
-
     src_ipaddress = _ClassProperty('_get_src_ipaddress', '_set_src_ipaddress')
 
 
 class Packet(with_metaclass(_SourceIPMeta, object)):
-
     src_netid = 254
     src_devid = 254
     src_devtype = 65534
@@ -45,7 +49,7 @@ class Packet(with_metaclass(_SourceIPMeta, object)):
 
     def __init__(
         self, data=bytearray(),
-        opcode=0x000e, netid=255, devid=255,
+        opcode=OC_SEARCH, netid=ALL_NETWORKS, devid=ALL_DEVICES,
         src_netid=None, src_devid=None, src_devtype=None,
         src_ipaddress=None, hdlmiracle=False
     ):
