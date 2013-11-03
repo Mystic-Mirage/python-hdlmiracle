@@ -9,7 +9,7 @@ import struct
 from .opcode import OC_SEARCH
 
 
-All_NETWORKS = 255
+ALL_NETWORKS = 255
 ALL_DEVICES = 255
 
 
