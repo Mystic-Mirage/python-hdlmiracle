@@ -1,0 +1,2 @@
+OC_SEARCH = 0x000e
+OC_SEARCH_R = 0x000f
