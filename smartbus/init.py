@@ -19,6 +19,10 @@ def init():
     sender = Sender()
     distributor = Distributor(receiver, device_list)
 
+    receiver.daemon = True
+    sender.daemon = True
+    distributor.daemon = True
+
     receiver.start()
     sender.start()
     distributor.start()
