@@ -3,7 +3,7 @@ from __future__ import division, print_function, unicode_literals
 from future.builtins import *
 
 
-devices = {
+DEVICES = {
     112: ('SB-DN-HVAC', 'HVAC Module'),
     118: ('SB-4Z-UN', '4 Zone Dry Contact'),
     149: ('SB-DDP', 'Dynamic Display Panel'),
@@ -58,8 +58,8 @@ class Device(object):
 
     @property
     def info(self):
-        if self.devtype in devices:
-            return devices[self.devtype]
+        if self.devtype in DEVICES:
+            return DEVICES[self.devtype]
         else:
             return ('Unknown', 'Unknown')
 
