@@ -29,22 +29,22 @@ TYPES = {
 class Device(object):
     list = []
 
-    @classmethod
-    def append(cls, device):
-        if device not in cls.list:
-            cls.list.append(device)
+    @staticmethod
+    def append(device):
+        if device not in Device.list:
+            Device.list.append(device)
         else:
             raise Exception('Device already registered')
 
-    @classmethod
-    def remove(cls, device):
-        if device in cls.list:
-            cls.list.remove(device)
+    @staticmethod
+    def remove(device):
+        if device in Device.list:
+            Device.list.remove(device)
         else:
             raise Exception('Device not registered')
 
-    @classmethod
-    def type_info(cls, devtype):
+    @staticmethod
+    def type_info(devtype):
         if devtype in TYPES:
             return TYPES[devtype]
         else:
