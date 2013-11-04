@@ -7,7 +7,7 @@ from queue import Empty, Queue
 import socket
 from threading import Thread
 
-from .packet import Packet
+from ._packet import Packet
 
 
 class Distributor(Thread):

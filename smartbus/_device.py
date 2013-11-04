@@ -2,6 +2,8 @@ from __future__ import absolute_import
 from __future__ import division, print_function, unicode_literals
 from future.builtins import *
 
+from threading import Event
+
 
 TYPES = {
     112: ('SB-DN-HVAC', 'HVAC Module'),
@@ -58,6 +60,8 @@ class Device(object):
         self.devid = devid
         if register:
             self.register()
+        self.receive_ready = Event()
+        self.receive_ready.set()
 
     @property
     def devtype(self):
@@ -72,7 +76,10 @@ class Device(object):
             (self.netid is None or packet.dst_netid in (self.netid, 255)) and
             (self.devid is None or packet.dst_devid in (self.devid, 255))
         ):
+            self.receive_ready.wait()
+            self.receive_ready.clear()
             self.receive_func(packet)
+            self.receive_ready.set()
 
     def receive_func(self, packet):
         pass

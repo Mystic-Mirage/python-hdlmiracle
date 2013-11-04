@@ -6,7 +6,7 @@ from future.utils import with_metaclass
 from ipaddress import IPv4Address
 import struct
 
-from .opcode import OC_SEARCH
+from ._opcode import OC_SEARCH
 
 
 ALL_NETWORKS = 255
