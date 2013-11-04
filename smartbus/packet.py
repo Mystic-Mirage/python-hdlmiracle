@@ -158,8 +158,8 @@ class Packet(with_metaclass(_SourceIPMeta, object)):
             self.devid = packet_body[7]
             if self.big:
                 big_len0 = packet_body[8] << 8 | packet_body[9]
-                big_len = len(self.data) + 2
                 self.data = packet_body[10:]
+                big_len = len(self.data) + 2
                 if big_len0 != big_len:
                     raise Exception(
                         'Wrong packet length ({0}). '
