@@ -43,7 +43,7 @@ def main():
     smartbus.init()
 
     searcher = Searcher()
-    print('netid  devid  devtype           devtype_repr')
+    print('netid  devid  devtype           device_info')
 
     try:
         while True:
