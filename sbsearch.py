@@ -9,8 +9,8 @@ import smartbus
 
 class Searcher(smartbus.Device):
 
-    def __init__(self, **kwargs):
-        super().__init__(self, **kwargs)
+    def __init__(self):
+        super().__init__()
         self.found = []
 
     def receive_func(self, packet):
