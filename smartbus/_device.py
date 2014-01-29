@@ -73,12 +73,17 @@ class Device(object):
 
     def receive(self, packet):
         if (
-            (self.netid is None or packet.dst_netid in (self.netid, 255)) and
-            (self.devid is None or packet.dst_devid in (self.devid, 255))
+            (self.netid is None or packet.netid in (self.netid, 255)) and
+            (self.devid is None or packet.devid in (self.devid, 255))
         ):
             self.receive_ready.wait()
             self.receive_ready.clear()
             self.receive_func(packet)
+            self.receive_ready.set()
+        if packet.src_netid == self.netid and packet.src_devid == self.devid:
+            self.receive_ready.wait()
+            self.receive_ready.clear()
+            self.send_func(packet)
             self.receive_ready.set()
 
     def receive_func(self, packet):
@@ -86,6 +91,9 @@ class Device(object):
 
     def register(self):
         self.append(self)
+
+    def send_func(self, packet):
+        pass
 
     def unregister(self):
         self.remove(self)
