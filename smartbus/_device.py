@@ -27,6 +27,7 @@ TYPES = {
     1108: ('SB-Logic2-DN', 'Logic Module'),
     1201: ('SB-RSIP-DN', 'RS232IP Module'),
     3049: ('SB-SEC250K-DN', 'Security Module'),
+    5020: ('SB-ZMix23-DN', 'Zone Beast Mix23'),
 }
 
 
