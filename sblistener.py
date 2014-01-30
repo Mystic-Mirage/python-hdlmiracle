@@ -18,7 +18,10 @@ class Listener(smartbus.Device):
         datarepr = []
         packet_len = len(packet.data)
         packet_lines = divmod(packet_len, 8)
-        lines_p = packet_lines[0] + 1 if packet_lines[1] > 0 else 0
+        if packet_len:
+            lines_p = packet_lines[0] + (1 if packet_lines[1] else 0)
+        else:
+            lines_p = 1
         self.lines += lines_p
 
         if self.lines > 23:
