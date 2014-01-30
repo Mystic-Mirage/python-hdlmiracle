@@ -22,6 +22,7 @@ TYPES = {
     600: ('SB-DIM6c2A-DN', 'Dimmer 6ch 2A'),
     601: ('SB-DIM4c3A-DN', 'Dimmer 4ch 3A'),
     602: ('SB-DIM2c6A-DN', 'Dimmer 2ch 6A'),
+    898: ('SB-4LED-DCV', 'LED Dimmer 4ch'),
     902: ('SB-ZAudio2-DN', 'Zone Audio'),
     1108: ('SB-Logic2-DN', 'Logic Module'),
     1201: ('SB-RSIP-DN', 'RS232IP Module'),
