@@ -1,7 +1,13 @@
 from __future__ import absolute_import
 
 from ._device import Device, TYPES
-from ._opcode import OC_SEARCH, OC_SEARCH_R
+from ._opcode import (
+    OC_CHANNELS_REPORT,
+    OC_CHANNELS_STATUS,
+    OC_CHANNELS_STATUS_R,
+    OC_SEARCH,
+    OC_SEARCH_R,
+)
 from ._packet import ALL_DEVICES, ALL_NETWORKS, Packet
 
 
@@ -10,6 +16,9 @@ __all__ = [
     'ALL_NETWORKS',
     'Device',
     'init',
+    'OC_CHANNELS_REPORT',
+    'OC_CHANNELS_STATUS',
+    'OC_CHANNELS_STATUS_R',
     'OC_SEARCH',
     'OC_SEARCH_R',
     'Packet',

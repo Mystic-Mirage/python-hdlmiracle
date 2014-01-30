@@ -15,16 +15,17 @@ class ZoneBeastFixer(smartbus.Device):
         self.channels_num = None
 
     def receive_func(self, packet):
-        if packet.opcode == 0x0033:
+        if packet.opcode == smartbus.OC_CHANNELS_STATUS:
             if self.channels is None:
                 return
             data = bytearray([self.channels_num] + self.channels)
-            response = smartbus.Packet(data, 0x0034, packet.src_netid,
-                packet.src_devid, self.netid, self.devid, self.devtype)
+            response = smartbus.Packet(data, smartbus.OC_CHANNELS_STATUS_R,
+                packet.src_netid, packet.src_devid, self.netid, self.devid,
+                self.devtype)
             smartbus.send(response)
 
     def send_func(self, packet):
-        if packet.opcode == 0xefff:
+        if packet.opcode == smartbus.OC_CHANNELS_REPORT:
             bytes_num = divmod(packet.data[2], 8)
             bytes_num = bytes_num[0] + (1 if bytes_num[1] else 0)
             shift = 0
