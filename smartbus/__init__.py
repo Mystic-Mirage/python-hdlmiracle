@@ -2,6 +2,8 @@ from __future__ import absolute_import
 
 from ._device import Device, TYPES
 from ._opcode import (
+    OC_CHANNEL_CONTROL,
+    OC_CHANNEL_CONTROL_R,
     OC_CHANNELS_REPORT,
     OC_CHANNELS_STATUS,
     OC_CHANNELS_STATUS_R,
@@ -16,6 +18,8 @@ __all__ = [
     'ALL_NETWORKS',
     'Device',
     'init',
+    'OC_CHANNEL_CONTROL',
+    'OC_CHANNEL_CONTROL_R',
     'OC_CHANNELS_REPORT',
     'OC_CHANNELS_STATUS',
     'OC_CHANNELS_STATUS_R',

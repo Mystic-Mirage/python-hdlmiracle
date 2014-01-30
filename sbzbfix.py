@@ -48,7 +48,7 @@ class ZoneBeastFixer(smartbus.Device):
                     self.channels[channel] = 0
                 mask <<= 1
             print(self.channels)
-        if packet.opcode == 0x0032:
+        if packet.opcode == smartbus.OC_CHANNEL_CONTROL_R:
             channel = packet.data[0]
             value = packet.data[2]
             self.channels[channel - 1] = value
