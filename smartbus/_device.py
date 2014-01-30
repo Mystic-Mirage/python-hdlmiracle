@@ -6,6 +6,7 @@ from threading import Event
 
 
 TYPES = {
+    32: ('SB-DMX48-DN', 'DMX48'),
     112: ('SB-DN-HVAC', 'HVAC Module'),
     118: ('SB-4Z-UN', '4 Zone Dry Contact'),
     149: ('SB-DDP', 'Dynamic Display Panel'),
