@@ -9,8 +9,8 @@ import smartbus
 
 class ZoneBeastFixer(smartbus.Device):
 
-    def __init__(self, devtype, netid, devid):
-        super().__init__(devtype=devtype, netid=netid, devid=devid)
+    def __init__(self, netid, devid):
+        super().__init__(netid=netid, devid=devid)
         self.channels = None
         self.channels_num = None
 
@@ -58,7 +58,7 @@ class ZoneBeastFixer(smartbus.Device):
 
 def main():
     smartbus.init()
-    ZoneBeastFixer(5020, 1, 28)
+    ZoneBeastFixer(1, 28)
     print('Smart-Bus ZoneBeastFixer Started...')
 
     try:
