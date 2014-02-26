@@ -4,6 +4,7 @@ from future.builtins import *
 
 from threading import Event
 
+from ._packet import Packet
 
 TYPES = {
     32: ('SB-DMX48-DN', 'DMX48'),
@@ -73,6 +74,9 @@ class Device(object):
     @property
     def info(self):
         return self.type_info(self.devtype)
+
+    def packet(self, opcode, data):
+        return Packet(bytearray(data), opcode, self.netid, self.devid)
 
     def receive(self, packet):
         if (

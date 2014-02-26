@@ -2,7 +2,7 @@ from __future__ import absolute_import
 from __future__ import division, print_function, unicode_literals
 from future.builtins import *
 
-from . import Device, OC_CHANNEL_CONTROL, Packet, sendmethod
+from . import Device, OC_CHANNEL_CONTROL, sendmethod
 
 
 ALL_CHANNELS = 255
@@ -23,8 +23,7 @@ class DimmerRelay(Device):
     @sendmethod
     def _set_channel(self, channel, value):
         self._channels[channel] = value
-        return Packet(bytearray((channel, value, 0, 0)), OC_CHANNEL_CONTROL,
-            self.netid, self.devid)
+        return self.packet(OC_CHANNEL_CONTROL, (channel, value, 0, 0))
 
     def channel(self, channel, value=None):
         if value is None:
