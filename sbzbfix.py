@@ -58,7 +58,7 @@ class ZoneBeastFixer(smartbus.Device):
 
 def main():
     smartbus.init()
-    ZoneBeastFixer(5030, 1, 28)
+    ZoneBeastFixer(5020, 1, 28)
     print('Smart-Bus ZoneBeastFixer Started...')
 
     try:
