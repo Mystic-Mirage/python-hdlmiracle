@@ -1,8 +1,15 @@
 from __future__ import absolute_import
-from __future__ import division, print_function, unicode_literals
-from future.builtins import *
+from future.builtins import super
 
 from . import Device, OC_CHANNEL_CONTROL, sendmethod
+
+
+__all__ = [
+    'ALL_CHANNELS',
+    'CHANNEL_OFF',
+    'CHANNEL_ON',
+    'DimmerRelay',
+]
 
 
 ALL_CHANNELS = 255
