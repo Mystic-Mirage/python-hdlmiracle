@@ -96,8 +96,11 @@ class Packet(with_metaclass(_SourceIPMeta, object)):
         return 0xff if self.big else len(self.data) + 11
 
     @property
-    def opcode_hex(self):
-        return format(self.opcode, '#06x')
+    def opcode_hex(self, prefix=True):
+        if prefix:
+            return format(self.opcode, '#06x')
+        else:
+            return format(self.opcode, '04x')
 
     @opcode_hex.setter
     def opcode_hex(self, value):
