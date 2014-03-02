@@ -48,13 +48,13 @@ class Packet(with_metaclass(_SourceIPMeta, object)):
         else:
             cls._src_ipaddress = IPv4Address(ipaddress)
 
-    def __new__(cls, opcode=OC_SEARCH, data=(), netid=ALL_NETWORKS,
+    def __new__(cls, opcode=OC_SEARCH, data=[], netid=ALL_NETWORKS,
         devid=ALL_DEVICES, src_netid=None, src_devid=None, src_devtype=None,
         src_ipaddress=None, hdlmiracle=None):
 
         self = object.__new__(cls)
         self.opcode = opcode
-        self.data = bytearray(data)
+        self.data = list(data)
         self.netid = netid
         self.devid = devid
         if src_netid is not None:
@@ -98,13 +98,13 @@ class Packet(with_metaclass(_SourceIPMeta, object)):
             self.devid = packet_body[7]
             if self.big:
                 big_len0 = packet_body[8] << 8 | packet_body[9]
-                self.data = packet_body[10:]
+                self.data = list(packet_body[10:])
                 big_len = len(self.data) + 2
                 if big_len0 != big_len:
                     raise Exception('Wrong packet length ({0}). '
                         'Expected {1}'.format(big_len0, big_len))
             else:
-                self.data = packet_body[8:]
+                self.data = list(packet_body[8:])
                 if packet[-2] << 8 | packet[-1] != self.crc:
                     raise Exception('Wrong checksum')
         return self
@@ -116,7 +116,7 @@ class Packet(with_metaclass(_SourceIPMeta, object)):
             bytearray(struct.pack(b'!H', self.src_devtype)) +
             bytearray(struct.pack(b'!H', self.opcode)) +
             bytearray([self.netid, self.devid]) +
-            self.data
+            bytearray(self.data)
         )
         checksum = 0
         for i in packet_array:
@@ -159,7 +159,7 @@ class Packet(with_metaclass(_SourceIPMeta, object)):
         else:
             head0 = bytearray(b'SMARTCLOUD')
         head = bytearray([0xaa, 0xaa, self.length])
-        data = self.data
+        data = bytearray(self.data)
         if self.big:
             crc = bytearray()
             data = bytearray([len(self.data) + 2]) + data
