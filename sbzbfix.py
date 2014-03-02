@@ -16,7 +16,7 @@ class ZoneBeastFixer(smartbus.Device):
 
     @smartbus.sendmethod
     def send(self, data, netid, devid):
-        return smartbus.Packet(data, smartbus.OC_CHANNELS_STATUS_R,
+        return smartbus.Packet(smartbus.OC_CHANNELS_STATUS_R, data,
             netid, devid, self.netid, self.devid, self.devtype)
 
     def receive_func(self, packet):

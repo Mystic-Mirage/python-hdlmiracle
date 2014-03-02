@@ -75,9 +75,6 @@ class Device(object):
     def info(self):
         return self.type_info(self.devtype)
 
-    def packet(self, opcode, data):
-        return Packet(bytearray(data), opcode, self.netid, self.devid)
-
     def receive(self, packet):
         if (
             (self.netid is None or packet.netid in (self.netid, 255)) and
