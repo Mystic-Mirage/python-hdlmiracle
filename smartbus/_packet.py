@@ -78,7 +78,7 @@ class Packet(with_metaclass(_SourceIPMeta, object)):
     def from_raw(cls, raw_packet):
         self = object.__new__(cls)
         packet = bytearray(raw_packet)
-        self.src_ipaddress = IPv4Address('.'.join(str(x) for x in packet[:4]))
+        self.src_ipaddress = IPv4Address('.'.join(map(str, packet[:4])))
         if packet[4:].startswith(b'SMARTCLOUD'):
             self.hdlmiracle = False
         elif packet[4:].startswith(b'HDLMIRACLE'):
