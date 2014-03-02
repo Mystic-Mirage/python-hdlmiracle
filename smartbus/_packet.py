@@ -13,6 +13,19 @@ ALL_NETWORKS = 255
 ALL_DEVICES = 255
 
 
+def _crc(packet_array):
+    checksum = 0
+    for i in packet_array:
+        checksum = checksum ^ (i << 8)
+        for _ in range(8):
+            if (checksum & 0x8000) > 0:
+                checksum = (checksum << 1) ^ 0x1021
+            else:
+                checksum = checksum << 1
+        checksum = checksum & 0xffff
+    return checksum
+
+
 def _join_bytearrays(*args):
     return bytearray.join(bytearray(), args)
 
@@ -122,16 +135,7 @@ class Packet(with_metaclass(_SourceIPMeta, object)):
             bytearray([self.netid, self.devid]),
             bytearray(self.data)
         )
-        checksum = 0
-        for i in packet_array:
-            checksum = checksum ^ (i << 8)
-            for _ in range(8):
-                if (checksum & 0x8000) > 0:
-                    checksum = (checksum << 1) ^ 0x1021
-                else:
-                    checksum = checksum << 1
-            checksum = checksum & 0xffff
-        return checksum
+        return _crc(packet_array)
 
     @property
     def length(self):
@@ -162,16 +166,18 @@ class Packet(with_metaclass(_SourceIPMeta, object)):
             head0 = bytearray(b'HDLMIRACLE')
         else:
             head0 = bytearray(b'SMARTCLOUD')
-        head = bytearray([0xaa, 0xaa, self.length])
+        head = bytearray([0xaa, 0xaa])
+        length = bytearray([self.length])
         data = bytearray(self.data)
         if self.big:
             big_len = bytearray([len(self.data) + 2])
-            return _join_bytearrays(src_ipaddress, head0, head, src,
+            return _join_bytearrays(src_ipaddress, head0, head, length, src,
                 src_devtype, opcode, dst, big_len, data)
         else:
-            crc = bytearray(struct.pack(b'!H', self.crc))
-            return _join_bytearrays(src_ipaddress, head0, head, src,
-                src_devtype, opcode, dst, data, crc)
+            body = _join_bytearrays(length, src, src_devtype, opcode, dst,
+                data)
+            crc = bytearray(struct.pack(b'!H', _crc(body)))
+            return _join_bytearrays(src_ipaddress, head0, head, body, crc)
 
     @property
     def src_ipaddress(self):
