@@ -171,13 +171,14 @@ class Packet(with_metaclass(_SourceIPMeta, object)):
         data = bytearray(self.data)
         if self.big:
             big_len = bytearray([len(self.data) + 2])
-            return _join_bytearrays(src_ipaddress, head0, head, length, src,
+            packed = _join_bytearrays(src_ipaddress, head0, head, length, src,
                 src_devtype, opcode, dst, big_len, data)
         else:
             body = _join_bytearrays(length, src, src_devtype, opcode, dst,
                 data)
             crc = bytearray(struct.pack(b'!H', _crc(body)))
-            return _join_bytearrays(src_ipaddress, head0, head, body, crc)
+            packed = _join_bytearrays(src_ipaddress, head0, head, body, crc)
+        return bytes(packed)
 
     @property
     def src_ipaddress(self):
