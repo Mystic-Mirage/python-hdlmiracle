@@ -145,6 +145,10 @@ class Packet(with_metaclass(_SourceIPMeta, object)):
     def opcode_hex(self):
         return format(self.opcode, '#06x')
 
+    @property
+    def opcode_hex0(self):
+        return format(self.opcode, '04x')
+
     @opcode_hex.setter
     def opcode_hex(self, value):
         if type(value) is int:
