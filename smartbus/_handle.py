@@ -28,7 +28,7 @@ class Distributor(Thread):
             else:
                 if raw_packet is not None:
                     for device in self.device_list:
-                        device.receive(Packet(raw_packet))
+                        device.receive(Packet.from_raw(raw_packet))
 
     def stop(self):
         self.running = False

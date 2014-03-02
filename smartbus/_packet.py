@@ -34,6 +34,7 @@ class Packet(with_metaclass(_SourceIPMeta, object)):
     src_netid = 254
     src_devid = 254
     src_devtype = 65534
+    hdlmiracle = False
     _src_ipaddress = IPv4Address('127.0.0.1')
 
     @classmethod
@@ -47,29 +48,66 @@ class Packet(with_metaclass(_SourceIPMeta, object)):
         else:
             cls._src_ipaddress = IPv4Address(ipaddress)
 
-    def __init__(
-        self, data=bytearray(),
-        opcode=OC_SEARCH, netid=ALL_NETWORKS, devid=ALL_DEVICES,
-        src_netid=None, src_devid=None, src_devtype=None,
-        src_ipaddress=None, hdlmiracle=False
-    ):
-        if type(data) == bytearray:
-            self.data = data
-            self.opcode = opcode
-            self.netid = netid
-            self.devid = devid
-            if src_netid is not None:
-                self.src_netid = src_netid
-            if src_devid is not None:
-                self.src_devid = src_devid
-            if src_devtype is not None:
-                self.src_devtype = src_devtype
-            if src_ipaddress is not None:
-                self.src_ipaddress = src_ipaddress
-            self.big = False
+    def __new__(cls, opcode=OC_SEARCH, data=(), netid=ALL_NETWORKS,
+        devid=ALL_DEVICES, src_netid=None, src_devid=None, src_devtype=None,
+        src_ipaddress=None, hdlmiracle=None):
+
+        self = object.__new__(cls)
+        self.opcode = opcode
+        self.data = bytearray(data)
+        self.netid = netid
+        self.devid = devid
+        if src_netid is not None:
+            self.src_netid = src_netid
+        if src_devid is not None:
+            self.src_devid = src_devid
+        if src_devtype is not None:
+            self.src_devtype = src_devtype
+        if src_ipaddress is not None:
+            self.src_ipaddress = src_ipaddress
+        if hdlmiracle is not None:
             self.hdlmiracle = hdlmiracle
+        self.big = False
+        return self
+
+    @classmethod
+    def from_raw(cls, raw_packet):
+        self = object.__new__(cls)
+        packet = bytearray(raw_packet)
+        self.src_ipaddress = IPv4Address('.'.join(str(x) for x in packet[:4]))
+        if packet[4:].startswith(b'SMARTCLOUD'):
+            self.hdlmiracle = False
+        elif packet[4:].startswith(b'HDLMIRACLE'):
+            self.hdlmiracle = True
         else:
-            self.packed = data
+            raise Exception('Not SmartBus packet')
+        self.big = True if packet[16] == 0xff else False
+        if not self.big and len(packet) != packet[16] + 16:
+            raise Exception('Wrong packet length ({0}). '
+                'Expected value is {1}'.format(packet[16], len(packet)))
+        else:
+            if self.big:
+                packet_body = packet[17:]
+            else:
+                packet_body = packet[17:-2]
+            self.src_netid = packet_body[0]
+            self.src_devid = packet_body[1]
+            self.src_devtype = packet_body[2] << 8 | packet_body[3]
+            self.opcode = packet_body[4] << 8 | packet_body[5]
+            self.netid = packet_body[6]
+            self.devid = packet_body[7]
+            if self.big:
+                big_len0 = packet_body[8] << 8 | packet_body[9]
+                self.data = packet_body[10:]
+                big_len = len(self.data) + 2
+                if big_len0 != big_len:
+                    raise Exception('Wrong packet length ({0}). '
+                        'Expected {1}'.format(big_len0, big_len))
+            else:
+                self.data = packet_body[8:]
+                if packet[-2] << 8 | packet[-1] != self.crc:
+                    raise Exception('Wrong checksum')
+        return self
 
     @property
     def crc(self):
@@ -131,47 +169,6 @@ class Packet(with_metaclass(_SourceIPMeta, object)):
             src_ipaddress + head0 + head + src + src_devtype + opcode + dst +
             data + crc
         )
-
-    @packed.setter
-    def packed(self, raw_packet):
-        packet = bytearray(raw_packet)
-        self.src_ipaddress = IPv4Address('.'.join(str(x) for x in packet[:4]))
-        if packet[4:].startswith(b'SMARTCLOUD'):
-            self.hdlmiracle = False
-        elif packet[4:].startswith(b'HDLMIRACLE'):
-            self.hdlmiracle = True
-        else:
-            raise Exception('Not SmartBus packet')
-        self.big = True if packet[16] == 0xff else False
-        if not self.big and len(packet) != packet[16] + 16:
-            raise Exception(
-                'Wrong packet length ({0}). '
-                'Expected value is {1}'.format(packet[16], len(packet))
-            )
-        else:
-            if self.big:
-                packet_body = packet[17:]
-            else:
-                packet_body = packet[17:-2]
-            self.src_netid = packet_body[0]
-            self.src_devid = packet_body[1]
-            self.src_devtype = packet_body[2] << 8 | packet_body[3]
-            self.opcode = packet_body[4] << 8 | packet_body[5]
-            self.netid = packet_body[6]
-            self.devid = packet_body[7]
-            if self.big:
-                big_len0 = packet_body[8] << 8 | packet_body[9]
-                self.data = packet_body[10:]
-                big_len = len(self.data) + 2
-                if big_len0 != big_len:
-                    raise Exception(
-                        'Wrong packet length ({0}). '
-                        'Expected {1}'.format(big_len0, big_len)
-                    )
-            else:
-                self.data = packet_body[8:]
-                if packet[-2] << 8 | packet[-1] != self.crc:
-                    raise Exception('Wrong checksum')
 
     @property
     def src_ipaddress(self):
