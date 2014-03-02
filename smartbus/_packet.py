@@ -13,6 +13,10 @@ ALL_NETWORKS = 255
 ALL_DEVICES = 255
 
 
+def _join_bytearrays(*args):
+    return bytearray.join(bytearray(), args)
+
+
 class _ClassProperty(object):
 
     def __init__(self, getter, setter):
@@ -111,11 +115,11 @@ class Packet(with_metaclass(_SourceIPMeta, object)):
 
     @property
     def crc(self):
-        packet_array = (
-            bytearray([self.length, self.src_netid, self.src_devid]) +
-            bytearray(struct.pack(b'!H', self.src_devtype)) +
-            bytearray(struct.pack(b'!H', self.opcode)) +
-            bytearray([self.netid, self.devid]) +
+        packet_array = _join_bytearrays(
+            bytearray([self.length, self.src_netid, self.src_devid]),
+            bytearray(struct.pack(b'!H', self.src_devtype)),
+            bytearray(struct.pack(b'!H', self.opcode)),
+            bytearray([self.netid, self.devid]),
             bytearray(self.data)
         )
         checksum = 0
@@ -161,14 +165,13 @@ class Packet(with_metaclass(_SourceIPMeta, object)):
         head = bytearray([0xaa, 0xaa, self.length])
         data = bytearray(self.data)
         if self.big:
-            crc = bytearray()
-            data = bytearray([len(self.data) + 2]) + data
+            big_len = bytearray([len(self.data) + 2])
+            return _join_bytearrays(src_ipaddress, head0, head, src,
+                src_devtype, opcode, dst, big_len, data)
         else:
             crc = bytearray(struct.pack(b'!H', self.crc))
-        return (
-            src_ipaddress + head0 + head + src + src_devtype + opcode + dst +
-            data + crc
-        )
+            return _join_bytearrays(src_ipaddress, head0, head, src,
+                src_devtype, opcode, dst, data, crc)
 
     @property
     def src_ipaddress(self):
