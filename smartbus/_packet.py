@@ -184,6 +184,13 @@ class Packet(with_metaclass(_SourceIPMeta, BusPacket)):
         return self
 
     @classmethod
+    def from_bus(cls, bus_packet):
+        self = BusPacket.__new__(cls, bus_packet.opcode, bus_packet.data,
+            bus_packet.netid, bus_packet.devid, bus_packet.src_netid,
+            bus_packet.src_devid, bus_packet.src_devtype, bus_packet.big)
+        return self
+
+    @classmethod
     def from_raw(cls, raw_packet):
         packet = bytearray(raw_packet)
         if packet[4:].startswith(_g3_head):
@@ -206,6 +213,10 @@ class Packet(with_metaclass(_SourceIPMeta, BusPacket)):
         bus_packet = bytearray(BusPacket.packed(self))
         packed = _join_bytearrays(src_ipaddress, head0, bus_packet)
         return bytes(packed)
+
+    def to_bus(self):
+        return BusPacket(self.opcode, self.data, self.netid, self.devid,
+            self.src_netid, self.src_devid, self.src_devtype, self.big)
 
     @property
     def src_ipaddress(self):
