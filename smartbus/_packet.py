@@ -143,16 +143,16 @@ class Packet(with_metaclass(_SourceIPMeta, object)):
     def opcode_hex(self):
         return format(self.opcode, '#06x')
 
-    @property
-    def opcode_hex0(self):
-        return format(self.opcode, '04x')
-
     @opcode_hex.setter
     def opcode_hex(self, value):
         if type(value) is int:
             self.opcode = value
         else:
             self.opcode = int(value, 16)
+
+    @property
+    def opcode_hex0(self):
+        return format(self.opcode, '04x')
 
     def packed(self):
         src_ipaddress = bytearray(self.src_ipaddress.packed)
