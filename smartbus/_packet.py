@@ -158,7 +158,7 @@ class BusPacket(object):
 
 class Packet(with_metaclass(_SourceIPMeta, BusPacket)):
     _src_ipaddress = IPv4Address('127.0.0.1')
-    hdlmiracle = False
+    hdl = False
 
     @classmethod
     def _get_src_ipaddress(cls):
@@ -173,14 +173,14 @@ class Packet(with_metaclass(_SourceIPMeta, BusPacket)):
 
     def __new__(cls, opcode=OC_SEARCH, data=[], netid=ALL_NETWORKS,
         devid=ALL_DEVICES, src_netid=None, src_devid=None, src_devtype=None,
-        big=False, src_ipaddress=None, hdlmiracle=None):
+        big=False, src_ipaddress=None, hdl=None):
 
         self = BusPacket.__new__(cls, opcode, data, netid, devid, src_netid,
             src_devid, src_devtype, big)
         if src_ipaddress is not None:
             self.src_ipaddress = src_ipaddress
-        if hdlmiracle is not None:
-            self.hdlmiracle = hdlmiracle
+        if hdl is not None:
+            self.hdl = hdl
         return self
 
     @classmethod
@@ -189,16 +189,16 @@ class Packet(with_metaclass(_SourceIPMeta, BusPacket)):
         self = BusPacket.from_raw(packet[14:])
         self.src_ipaddress = IPv4Address('.'.join(map(str, packet[:4])))
         if packet[4:].startswith(_g3_head):
-            self.hdlmiracle = True
+            self.hdl = True
         elif packet[4:].startswith(_g4_head):
-            self.hdlmiracle = False
+            self.hdl = False
         else:
             raise Exception('Not SmartBus packet')
         return self
 
     def packed(self):
         src_ipaddress = bytearray(self.src_ipaddress.packed)
-        if self.hdlmiracle:
+        if self.hdl:
             head0 = _g3_head
         else:
             head0 = _g4_head
