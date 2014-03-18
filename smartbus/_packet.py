@@ -122,13 +122,13 @@ class Packet(with_metaclass(_SourceIPMeta, object)):
                         'Expected {1}'.format(big_len0, big_len))
             else:
                 self.data = list(packet_body[8:])
-                if packet[-2] << 8 | packet[-1] != self.crc:
+                if packet[-2] << 8 | packet[-1] != self.crc():
                     raise Exception('Wrong checksum')
         return self
 
     def crc(self):
         packet_array = _join_bytearrays(
-            bytearray([self.length, self.src_netid, self.src_devid]),
+            bytearray([self.length(), self.src_netid, self.src_devid]),
             bytearray(struct.pack(b'!H', self.src_devtype)),
             bytearray(struct.pack(b'!H', self.opcode)),
             bytearray([self.netid, self.devid]),
@@ -165,7 +165,7 @@ class Packet(with_metaclass(_SourceIPMeta, object)):
         else:
             head0 = bytearray(b'SMARTCLOUD')
         head = bytearray([0xaa, 0xaa])
-        length = bytearray([self.length])
+        length = bytearray([self.length()])
         data = bytearray(self.data)
         if self.big:
             big_len = bytearray([len(self.data) + 2])
