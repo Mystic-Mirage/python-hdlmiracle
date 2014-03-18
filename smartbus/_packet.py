@@ -67,7 +67,7 @@ class Packet(with_metaclass(_SourceIPMeta, object)):
 
     def __new__(cls, opcode=OC_SEARCH, data=[], netid=ALL_NETWORKS,
         devid=ALL_DEVICES, src_netid=None, src_devid=None, src_devtype=None,
-        src_ipaddress=None, hdlmiracle=None):
+        big=False, src_ipaddress=None, hdlmiracle=None):
 
         self = object.__new__(cls)
         self.opcode = opcode
@@ -80,11 +80,11 @@ class Packet(with_metaclass(_SourceIPMeta, object)):
             self.src_devid = src_devid
         if src_devtype is not None:
             self.src_devtype = src_devtype
+        self.big = big
         if src_ipaddress is not None:
             self.src_ipaddress = src_ipaddress
         if hdlmiracle is not None:
             self.hdlmiracle = hdlmiracle
-        self.big = False
         return self
 
     @classmethod
