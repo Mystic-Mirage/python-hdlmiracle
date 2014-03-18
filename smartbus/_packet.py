@@ -12,6 +12,10 @@ from ._opcode import OC_SEARCH
 ALL_NETWORKS = 255
 ALL_DEVICES = 255
 
+_bus_head = bytearray([0xaa, 0xaa])
+_g3_head = bytearray(b'HDLMIRACLE')
+_g4_head = bytearray(b'SMARTCLOUD')
+
 
 def _crc(packet_array):
     checksum = 0
@@ -47,27 +51,14 @@ class _SourceIPMeta(type):
     src_ipaddress = _ClassProperty('_get_src_ipaddress', '_set_src_ipaddress')
 
 
-class Packet(with_metaclass(_SourceIPMeta, object)):
+class BusPacket(object):
     src_netid = 254
     src_devid = 254
     src_devtype = 65534
-    _src_ipaddress = IPv4Address('127.0.0.1')
-    hdlmiracle = False
-
-    @classmethod
-    def _get_src_ipaddress(cls):
-        return cls._src_ipaddress
-
-    @classmethod
-    def _set_src_ipaddress(cls, ipaddress):
-        if type(ipaddress) == IPv4Address:
-            cls._src_ipaddress = ipaddress
-        else:
-            cls._src_ipaddress = IPv4Address(ipaddress)
 
     def __new__(cls, opcode=OC_SEARCH, data=[], netid=ALL_NETWORKS,
         devid=ALL_DEVICES, src_netid=None, src_devid=None, src_devtype=None,
-        big=False, src_ipaddress=None, hdlmiracle=None):
+        big=False):
 
         self = object.__new__(cls)
         self.opcode = opcode
@@ -81,32 +72,24 @@ class Packet(with_metaclass(_SourceIPMeta, object)):
         if src_devtype is not None:
             self.src_devtype = src_devtype
         self.big = big
-        if src_ipaddress is not None:
-            self.src_ipaddress = src_ipaddress
-        if hdlmiracle is not None:
-            self.hdlmiracle = hdlmiracle
         return self
 
     @classmethod
     def from_raw(cls, raw_packet):
         self = object.__new__(cls)
         packet = bytearray(raw_packet)
-        self.src_ipaddress = IPv4Address('.'.join(map(str, packet[:4])))
-        if packet[4:].startswith(b'SMARTCLOUD'):
-            self.hdlmiracle = False
-        elif packet[4:].startswith(b'HDLMIRACLE'):
-            self.hdlmiracle = True
-        else:
+        if not packet.startswith(_bus_head):
             raise Exception('Not SmartBus packet')
-        self.big = True if packet[16] == 0xff else False
-        if not self.big and len(packet) != packet[16] + 16:
+        self.big = True if packet[2] == 0xff else False
+        packet_len = len(packet) - 2
+        if not self.big and packet_len != packet[2]:
             raise Exception('Wrong packet length ({0}). '
-                'Expected value is {1}'.format(packet[16], len(packet)))
+                'Expected value is {1}'.format(packet[2], packet_len))
         else:
             if self.big:
-                packet_body = packet[17:]
+                packet_body = packet[3:]
             else:
-                packet_body = packet[17:-2]
+                packet_body = packet[3:-2]
             self.src_netid = packet_body[0]
             self.src_devid = packet_body[1]
             self.src_devtype = packet_body[2] << 8 | packet_body[3]
@@ -155,27 +138,72 @@ class Packet(with_metaclass(_SourceIPMeta, object)):
         return format(self.opcode, '04x')
 
     def packed(self):
-        src_ipaddress = bytearray(self.src_ipaddress.packed)
         src = bytearray([self.src_netid, self.src_devid])
         src_devtype = bytearray(struct.pack(b'!H', self.src_devtype))
         opcode = bytearray(struct.pack(b'!H', self.opcode))
         dst = bytearray([self.netid, self.devid])
-        if self.hdlmiracle:
-            head0 = bytearray(b'HDLMIRACLE')
-        else:
-            head0 = bytearray(b'SMARTCLOUD')
-        head = bytearray([0xaa, 0xaa])
         length = bytearray([self.length()])
         data = bytearray(self.data)
         if self.big:
             big_len = bytearray([len(self.data) + 2])
-            packed = _join_bytearrays(src_ipaddress, head0, head, length, src,
-                src_devtype, opcode, dst, big_len, data)
+            packed = _join_bytearrays(_bus_head, length, src, src_devtype,
+                opcode, dst, big_len, data)
         else:
             body = _join_bytearrays(length, src, src_devtype, opcode, dst,
                 data)
             crc = bytearray(struct.pack(b'!H', _crc(body)))
-            packed = _join_bytearrays(src_ipaddress, head0, head, body, crc)
+            packed = _join_bytearrays(_bus_head, body, crc)
+        return bytes(packed)
+
+
+class Packet(with_metaclass(_SourceIPMeta, BusPacket)):
+    _src_ipaddress = IPv4Address('127.0.0.1')
+    hdlmiracle = False
+
+    @classmethod
+    def _get_src_ipaddress(cls):
+        return cls._src_ipaddress
+
+    @classmethod
+    def _set_src_ipaddress(cls, ipaddress):
+        if type(ipaddress) == IPv4Address:
+            cls._src_ipaddress = ipaddress
+        else:
+            cls._src_ipaddress = IPv4Address(ipaddress)
+
+    def __new__(cls, opcode=OC_SEARCH, data=[], netid=ALL_NETWORKS,
+        devid=ALL_DEVICES, src_netid=None, src_devid=None, src_devtype=None,
+        big=False, src_ipaddress=None, hdlmiracle=None):
+
+        self = BusPacket.__new__(cls, opcode, data, netid, devid, src_netid,
+            src_devid, src_devtype, big)
+        if src_ipaddress is not None:
+            self.src_ipaddress = src_ipaddress
+        if hdlmiracle is not None:
+            self.hdlmiracle = hdlmiracle
+        return self
+
+    @classmethod
+    def from_raw(cls, raw_packet):
+        packet = bytearray(raw_packet)
+        self = BusPacket.from_raw(packet[14:])
+        self.src_ipaddress = IPv4Address('.'.join(map(str, packet[:4])))
+        if packet[4:].startswith(_g3_head):
+            self.hdlmiracle = True
+        elif packet[4:].startswith(_g4_head):
+            self.hdlmiracle = False
+        else:
+            raise Exception('Not SmartBus packet')
+        return self
+
+    def packed(self):
+        src_ipaddress = bytearray(self.src_ipaddress.packed)
+        if self.hdlmiracle:
+            head0 = _g3_head
+        else:
+            head0 = _g4_head
+        bus_packet = bytearray(BusPacket.packed(self))
+        packed = _join_bytearrays(src_ipaddress, head0, bus_packet)
         return bytes(packed)
 
     @property
