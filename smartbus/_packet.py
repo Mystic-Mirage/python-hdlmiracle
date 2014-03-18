@@ -51,8 +51,8 @@ class Packet(with_metaclass(_SourceIPMeta, object)):
     src_netid = 254
     src_devid = 254
     src_devtype = 65534
-    hdlmiracle = False
     _src_ipaddress = IPv4Address('127.0.0.1')
+    hdlmiracle = False
 
     @classmethod
     def _get_src_ipaddress(cls):
