@@ -126,7 +126,6 @@ class Packet(with_metaclass(_SourceIPMeta, object)):
                     raise Exception('Wrong checksum')
         return self
 
-    @property
     def crc(self):
         packet_array = _join_bytearrays(
             bytearray([self.length, self.src_netid, self.src_devid]),
@@ -137,7 +136,6 @@ class Packet(with_metaclass(_SourceIPMeta, object)):
         )
         return _crc(packet_array)
 
-    @property
     def length(self):
         return 0xff if self.big else len(self.data) + 11
 
@@ -156,7 +154,6 @@ class Packet(with_metaclass(_SourceIPMeta, object)):
         else:
             self.opcode = int(value, 16)
 
-    @property
     def packed(self):
         src_ipaddress = bytearray(self.src_ipaddress.packed)
         src = bytearray([self.src_netid, self.src_devid])
