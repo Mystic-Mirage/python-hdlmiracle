@@ -90,7 +90,7 @@ class Sender(Thread):
             except Empty:
                 pass
             else:
-                sock.sendto(packet.packed, ('<broadcast>', 6000))
+                sock.sendto(packet.packed(), ('<broadcast>', 6000))
 
         sock.close()
 
