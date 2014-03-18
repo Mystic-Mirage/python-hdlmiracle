@@ -186,14 +186,15 @@ class Packet(with_metaclass(_SourceIPMeta, BusPacket)):
     @classmethod
     def from_raw(cls, raw_packet):
         packet = bytearray(raw_packet)
-        self = BusPacket.from_raw(packet[14:])
-        self.src_ipaddress = IPv4Address('.'.join(map(str, packet[:4])))
         if packet[4:].startswith(_g3_head):
-            self.hdl = True
+            hdl = True
         elif packet[4:].startswith(_g4_head):
-            self.hdl = False
+            hdl = False
         else:
             raise Exception('Not SmartBus packet')
+        self = BusPacket.from_raw(packet[14:])
+        self.src_ipaddress = IPv4Address('.'.join(map(str, packet[:4])))
+        self.hdl = hdl
         return self
 
     def packed(self):
