@@ -59,9 +59,9 @@ class BusFromStream(object):
         self.raw_packet = None
         self.start = False
 
-    def extend(self, list_b):
-        self.raw_packet.extend(list_b)
-        self.length -= len(list_b)
+    def extend(self, b_array):
+        self.raw_packet.extend(b_array)
+        self.length -= len(b_array)
         if self.length > 0:
             return False
         else:
@@ -73,7 +73,8 @@ class BusFromStream(object):
         except:
             return None
 
-    def send(self, byte):
+    def send(self, char):
+        byte = ord(char)
         if self.start:
             if self.length is None:
                 self.length = byte
@@ -89,7 +90,7 @@ class BusFromStream(object):
             bytearray([self.prev_byte, byte]) == _bus_head
         ):
             self.start = True
-            self.raw_packet = list(_bus_head)
+            self.raw_packet = _bus_head
         self.prev_byte = byte
         return False
 
