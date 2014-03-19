@@ -59,6 +59,14 @@ class BusFromStream(object):
         self.raw_packet = None
         self.start = False
 
+    def extend(self, list_b):
+        self.raw_packet.extend(list_b)
+        self.length -= len(list_b)
+        if self.length > 0:
+            return False
+        else:
+            return True
+
     def get(self):
         try:
             return BusPacket.from_raw(self.raw_packet)
