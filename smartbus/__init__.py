@@ -10,12 +10,19 @@ from ._opcode import (
     OC_SEARCH,
     OC_SEARCH_R,
 )
-from ._packet import ALL_DEVICES, ALL_NETWORKS, BusPacket, Packet
+from ._packet import (
+    ALL_DEVICES,
+    ALL_NETWORKS,
+    BusFromStream,
+    BusPacket,
+    Packet
+)
 
 
 __all__ = [
     'ALL_DEVICES',
     'ALL_NETWORKS',
+    'BusFromStream',
     'BusPacket',
     'Device',
     'init',

@@ -51,6 +51,38 @@ class _SourceIPMeta(type):
     src_ipaddress = _ClassProperty('_get_src_ipaddress', '_set_src_ipaddress')
 
 
+class BusFromStream(object):
+
+    def __init__(self):
+        self.length = None
+        self.prev_byte = None
+        self.raw_packet = None
+        self.start = False
+
+    def get(self):
+        try:
+            return BusPacket.from_raw(self.raw_packet)
+        except:
+            return None
+
+    def send(self, byte):
+        if self.start:
+            if self.length is None:
+                self.length = byte
+            self.raw_packet.append(byte)
+            self.length -= 1
+            if self.length > 0:
+                return False
+            else:
+                return True
+        if (self.prev_byte is not None and
+            bytearray([self.prev_byte, byte]) == _bus_head):
+            self.start = True
+            self.raw_packet = list(_bus_head)
+        self.prev_byte = byte
+        return False
+
+
 class BusPacket(object):
     src_netid = 254
     src_devid = 254
