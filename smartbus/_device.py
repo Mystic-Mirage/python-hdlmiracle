@@ -56,9 +56,7 @@ class Device(object):
         else:
             return ('Unknown', 'Unknown')
 
-    def __init__(
-        self, netid=None, devid=None, devtype=None, register=True
-    ):
+    def __init__(self, netid=None, devid=None, devtype=None, register=True):
         self._devtype = devtype
         self.netid = netid
         self.devid = devid
