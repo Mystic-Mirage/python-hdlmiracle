@@ -12,9 +12,9 @@ from ._opcode import OC_SEARCH
 ALL_NETWORKS = 255
 ALL_DEVICES = 255
 
-_bus_head = bytearray([0xaa, 0xaa])
-_g3_head = bytearray(b'HDLMIRACLE')
-_g4_head = bytearray(b'SMARTCLOUD')
+_bus_head = bytes(b'\xaa\xaa')
+_g3_head = bytes(b'HDLMIRACLE')
+_g4_head = bytes(b'SMARTCLOUD')
 
 
 def _crc(packet_array):
@@ -56,7 +56,7 @@ class BusFromStream(object):
     def __init__(self):
         self.length = None
         self.prev_byte = None
-        self.raw_packet = None
+        self.raw_packet = bytearray()
         self.start = False
 
     def extend(self, b_array):
@@ -90,7 +90,7 @@ class BusFromStream(object):
             bytearray([self.prev_byte, byte]) == _bus_head
         ):
             self.start = True
-            self.raw_packet = _bus_head
+            self.raw_packet.extend(_bus_head)
         self.prev_byte = byte
         return False
 
