@@ -75,8 +75,11 @@ class BusFromStream(object):
                 return False
             else:
                 return True
-        if (self.prev_byte is not None and
-            bytearray([self.prev_byte, byte]) == _bus_head):
+        if (
+            not self.start and
+            self.prev_byte is not None and
+            bytearray([self.prev_byte, byte]) == _bus_head
+        ):
             self.start = True
             self.raw_packet = list(_bus_head)
         self.prev_byte = byte
