@@ -4,8 +4,6 @@ from future.builtins import *
 
 from threading import Event
 
-from ._packet import Packet
-
 TYPES = {
     32: ('SB-DMX48-DN', 'DMX48'),
     112: ('SB-DN-HVAC', 'HVAC Module'),
