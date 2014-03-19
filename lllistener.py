@@ -12,7 +12,7 @@ from smartbus import bus
 
 def direction_setup():
     GPIO.setwarnings(False)
-    GPIO.setmode(GPIO.BCM)
+    GPIO.setmode(GPIO.BOARD)
     GPIO.setup(12, GPIO.OUT)
 
 
