@@ -40,10 +40,13 @@ __all__ = [
 ]
 
 
-def init():
+def init(hdl=False):
     from ._handle import Distributor, Receiver, Sender
 
     global device_list, distributor, receiver, send, sender
+
+    if hdl:
+        Packet.hdl = True
 
     device_list = Device.list
 
