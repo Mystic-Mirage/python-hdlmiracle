@@ -96,9 +96,9 @@ class BusFromStream(object):
 
 
 class BusPacket(object):
-    src_netid = 254
-    src_devid = 254
-    src_devtype = 65534
+    src_netid = 0xbb
+    src_devid = 0xbb
+    src_devtype = 0xdddd
 
     def __new__(cls, opcode=OC_SEARCH, data=[], netid=ALL_NETWORKS,
         devid=ALL_DEVICES, src_netid=None, src_devid=None, src_devtype=None,
