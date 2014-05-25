@@ -97,9 +97,9 @@ def quit():
     global device_list, distributor, receiver, send, sender
 
     receiver.stop()
-    distributor.stop()
-
     receiver.join()
+
+    distributor.stop()
     distributor.join()
 
     del device_list
