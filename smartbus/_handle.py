@@ -48,7 +48,8 @@ class Distributor(Thread):
 class Receiver(Thread):
 
     def get(self, block=True, timeout=None):
-        return self.queue.get(block, timeout)
+        if hasattr(self, 'queue'):
+            return self.queue.get(block, timeout)
 
     def get_nowait(self):
         return self.get(False)
@@ -81,7 +82,8 @@ class Receiver(Thread):
 class Sender(Thread):
 
     def put(self, value):
-        self.queue.put(value)
+        if hasattr(self, 'queue'):
+            self.queue.put(value)
 
     def run(self):
         self.queue = Queue()
