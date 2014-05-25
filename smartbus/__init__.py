@@ -22,10 +22,6 @@ from ._packet import (
 __all__ = [
     'ALL_DEVICES',
     'ALL_NETWORKS',
-    'BusFromStream',
-    'BusPacket',
-    'Device',
-    'init',
     'OC_CHANNEL_CONTROL',
     'OC_CHANNEL_CONTROL_R',
     'OC_CHANNELS_REPORT',
@@ -33,17 +29,26 @@ __all__ = [
     'OC_CHANNELS_STATUS_R',
     'OC_SEARCH',
     'OC_SEARCH_R',
-    'Packet',
-    'sendmethod',
     'TYPES',
+    'BusFromStream',
+    'BusPacket',
+    'Device',
+    'Packet',
+    'init',
     'quit',
+    'sendmethod',
 ]
 
 
-def init(hdl=False):
-    from ._handle import Distributor, Receiver, Sender
+distrubutor = None
+receiver = None
+sender = None
 
-    global device_list, distributor, receiver, send, sender
+
+def init(hdl=False, no_sender=False):
+    from ._handle import Distributor, Receiver
+
+    global device_list, distributor, pause, receiver, resume, sender
 
     if hdl:
         Packet.hdl = True
@@ -51,25 +56,39 @@ def init(hdl=False):
     device_list = Device.list
 
     receiver = Receiver()
-    sender = Sender()
-    distributor = Distributor(receiver, device_list)
-
-    send = sender.put
-
     receiver.daemon = True
-    sender.daemon = True
-    distributor.daemon = True
-
     receiver.start()
-    sender.start()
+
+    distributor = Distributor(receiver, device_list)
+    distributor.daemon = True
     distributor.start()
+
+    if not no_sender:
+        from ._handle import Sender
+        global send, sendmethod
+        sender = Sender()
+        send = sender.put
+        sender.daemon = True
+        sender.start()
+
+
+def pause():
+    global distributor
+    if distributor:
+        distributor.pause()
+
+
+def resume():
+    global distrubutor
+    if distributor:
+        distributor.resume()
 
 
 def sendmethod(func):
-    global device_list, send
+    global device_list, send, sender
 
     def wrapper(obj, *args, **kwargs):
-        if obj in device_list:
+        if sender and obj in device_list:
             return send(func(obj, *args, **kwargs))
     return wrapper
 
@@ -78,18 +97,21 @@ def quit():
     global device_list, distributor, receiver, send, sender
 
     receiver.stop()
-    sender.stop()
     distributor.stop()
 
     receiver.join()
-    sender.join()
     distributor.join()
 
     del device_list
     del receiver
-    del sender
     del distributor
-    del send
+
+    if sender:
+        sender.stop()
+        sender.join()
+
+        del sender
+        del send
 
 
 del absolute_import

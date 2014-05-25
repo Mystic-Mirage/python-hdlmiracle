@@ -6,6 +6,7 @@ from future import standard_library
 from queue import Empty, Queue
 import socket
 from threading import Thread
+from time import sleep
 
 from ._packet import Packet
 
@@ -19,8 +20,12 @@ class Distributor(Thread):
 
     def run(self):
         self.running = True
+        self.paused = False
 
         while self.running:
+            if self.paused:
+                sleep(1)
+                continue
             try:
                 raw_packet = self.receiver.get(timeout=1)
             except Empty:
@@ -29,6 +34,12 @@ class Distributor(Thread):
                 if raw_packet is not None:
                     for device in self.device_list:
                         device.receive(Packet.from_raw(raw_packet))
+
+    def pause(self):
+        self.paused = True
+
+    def resume(self):
+        self.paused = False
 
     def stop(self):
         self.running = False
