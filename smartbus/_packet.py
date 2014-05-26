@@ -12,8 +12,8 @@ from ._opcode import OC_SEARCH
 ALL_NETWORKS = 255
 ALL_DEVICES = 255
 
+CREEPYFROG = bytes(b'CREEPYFROG')
 HDLMIRACLE = bytes(b'HDLMIRACLE')
-HELLOKITTY = bytes(b'HELLOKITTY')
 SMARTCLOUD = bytes(b'SMARTCLOUD')
 
 _bus_head = bytes(b'\xaa\xaa')

@@ -13,6 +13,7 @@ from ._opcode import (
 from ._packet import (
     ALL_DEVICES,
     ALL_NETWORKS,
+    CREEPYFROG,
     HDLMIRACLE,
     SMARTCLOUD,
     BusFromStream,
@@ -24,6 +25,7 @@ from ._packet import (
 __all__ = [
     'ALL_DEVICES',
     'ALL_NETWORKS',
+    'CREEPYFROG',
     'HDLMIRACLE',
     'OC_CHANNEL_CONTROL',
     'OC_CHANNEL_CONTROL_R',
