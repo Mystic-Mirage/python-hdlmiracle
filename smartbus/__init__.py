@@ -13,6 +13,9 @@ from ._opcode import (
 from ._packet import (
     ALL_DEVICES,
     ALL_NETWORKS,
+    HDLMIRACLE,
+    HELLOKITTY,
+    SMARTCLOUD,
     BusFromStream,
     BusPacket,
     Packet
@@ -22,6 +25,8 @@ from ._packet import (
 __all__ = [
     'ALL_DEVICES',
     'ALL_NETWORKS',
+    'HDLMIRACLE',
+    'HELLOKITTY',
     'OC_CHANNEL_CONTROL',
     'OC_CHANNEL_CONTROL_R',
     'OC_CHANNELS_REPORT',
@@ -29,6 +34,7 @@ __all__ = [
     'OC_CHANNELS_STATUS_R',
     'OC_SEARCH',
     'OC_SEARCH_R',
+    'SMARTCLOUD',
     'TYPES',
     'BusFromStream',
     'BusPacket',
@@ -45,13 +51,13 @@ receiver = None
 sender = None
 
 
-def init(hdl=False, no_sender=False):
+def init(header=None, no_sender=False):
     from ._handle import Distributor, Receiver
 
     global device_list, distributor, pause, receiver, resume, sender
 
-    if hdl:
-        Packet.hdl = True
+    if header:
+        Packet.header = header
 
     device_list = Device.list
 

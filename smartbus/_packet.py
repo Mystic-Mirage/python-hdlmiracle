@@ -12,9 +12,11 @@ from ._opcode import OC_SEARCH
 ALL_NETWORKS = 255
 ALL_DEVICES = 255
 
+HDLMIRACLE = bytes(b'HDLMIRACLE')
+HELLOKITTY = bytes(b'HELLOKITTY')
+SMARTCLOUD = bytes(b'SMARTCLOUD')
+
 _bus_head = bytes(b'\xaa\xaa')
-_g3_head = bytes(b'HDLMIRACLE')
-_g4_head = bytes(b'SMARTCLOUD')
 
 
 def _crc(packet_array):
@@ -202,7 +204,7 @@ class BusPacket(object):
 
 class Packet(with_metaclass(_SourceIPMeta, BusPacket)):
     _src_ipaddress = IPv4Address('127.0.0.1')
-    hdl = False
+    header = SMARTCLOUD
 
     @classmethod
     def _get_src_ipaddress(cls):
@@ -217,14 +219,14 @@ class Packet(with_metaclass(_SourceIPMeta, BusPacket)):
 
     def __new__(cls, opcode=OC_SEARCH, data=[], netid=ALL_NETWORKS,
         devid=ALL_DEVICES, src_netid=None, src_devid=None, src_devtype=None,
-        big=False, src_ipaddress=None, hdl=None):
+        big=False, src_ipaddress=None, header=None):
 
         self = BusPacket.__new__(cls, opcode, data, netid, devid, src_netid,
             src_devid, src_devtype, big)
         if src_ipaddress is not None:
             self.src_ipaddress = src_ipaddress
-        if hdl is not None:
-            self.hdl = hdl
+        if header:
+            self.header = header
         return self
 
     @classmethod
@@ -237,25 +239,15 @@ class Packet(with_metaclass(_SourceIPMeta, BusPacket)):
     @classmethod
     def from_raw(cls, raw_packet):
         packet = bytearray(raw_packet)
-        if packet[4:].startswith(_g3_head):
-            hdl = True
-        elif packet[4:].startswith(_g4_head):
-            hdl = False
-        else:
-            raise Exception('Not SmartBus packet')
         self = BusPacket.from_raw(packet[14:])
         self.src_ipaddress = IPv4Address('.'.join(map(str, packet[:4])))
-        self.hdl = hdl
+        self.header = packet[4:14]
         return self
 
     def packed(self):
         src_ipaddress = bytearray(self.src_ipaddress.packed)
-        if self.hdl:
-            head0 = _g3_head
-        else:
-            head0 = _g4_head
         bus_packet = bytearray(BusPacket.packed(self))
-        packed = _join_bytearrays(src_ipaddress, head0, bus_packet)
+        packed = _join_bytearrays(src_ipaddress, self.header, bus_packet)
         return bytes(packed)
 
     def to_bus(self):

@@ -40,7 +40,7 @@ class Searcher(smartbus.Device):
 
 
 def main():
-    smartbus.init(hdl=True)
+    smartbus.init(header=smartbus.HDLMIRACLE)
 
     searcher = Searcher()
     print('netid  devid  devtype           device_info')
