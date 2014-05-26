@@ -231,7 +231,7 @@ class Packet(with_metaclass(_SourceIPMeta, BusPacket)):
 
     @classmethod
     def from_bus(cls, bus_packet):
-        self = BusPacket.__new__(cls, bus_packet.opcode, bus_packet.data,
+        self = Packet.__new__(cls, bus_packet.opcode, bus_packet.data,
             bus_packet.netid, bus_packet.devid, bus_packet.src_netid,
             bus_packet.src_devid, bus_packet.src_devtype, bus_packet.big)
         return self
@@ -239,7 +239,8 @@ class Packet(with_metaclass(_SourceIPMeta, BusPacket)):
     @classmethod
     def from_raw(cls, raw_packet):
         packet = bytearray(raw_packet)
-        self = BusPacket.from_raw(packet[14:])
+        bus_packet = BusPacket.from_raw(packet[14:])
+        self = Packet.from_bus(bus_packet)
         self.src_ipaddress = IPv4Address('.'.join(map(str, packet[:4])))
         self.header = packet[4:14]
         return self
