@@ -16,6 +16,8 @@ CREEPYFROG = bytes(b'CREEPYFROG')
 HDLMIRACLE = bytes(b'HDLMIRACLE')
 SMARTCLOUD = bytes(b'SMARTCLOUD')
 
+HEADERS = [HDLMIRACLE, SMARTCLOUD]
+
 _bus_head = bytes(b'\xaa\xaa')
 
 
