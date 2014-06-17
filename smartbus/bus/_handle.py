@@ -7,7 +7,7 @@ from queue import Empty, Queue
 from serial import Serial
 from threading import Thread
 
-from .._packet import BusFromStream
+from ._packet import BusPacketFromStream
 
 
 class Bus(object):
@@ -20,7 +20,7 @@ class Bus(object):
             self.direction_in()
 
     def recv(self):
-        bus_packet = BusFromStream()
+        bus_packet = BusPacketFromStream()
         while True:
             char = self.serial.read(1)
             if char == b'':

@@ -17,7 +17,6 @@ from ._packet import (
     HDLMIRACLE,
     HEADERS,
     SMARTCLOUD,
-    BusFromStream,
     BusPacket,
     Packet
 )
@@ -38,7 +37,6 @@ __all__ = [
     'OC_SEARCH_R',
     'SMARTCLOUD',
     'TYPES',
-    'BusFromStream',
     'BusPacket',
     'Device',
     'Packet',

@@ -18,7 +18,7 @@ SMARTCLOUD = bytes(b'SMARTCLOUD')
 
 HEADERS = [HDLMIRACLE, SMARTCLOUD]
 
-_bus_head = bytes(b'\xaa\xaa')
+START_CODE = bytes(b'\xaa\xaa')
 
 
 def _crc(packet_array):
@@ -55,50 +55,6 @@ class _SourceIPMeta(type):
     src_ipaddress = _ClassProperty('_get_src_ipaddress', '_set_src_ipaddress')
 
 
-class BusFromStream(object):
-
-    def __init__(self):
-        self.length = None
-        self.prev_byte = None
-        self.raw_packet = bytearray()
-        self.start = False
-
-    def extend(self, b_array):
-        self.raw_packet.extend(b_array)
-        self.length -= len(b_array)
-        if self.length > 0:
-            return False
-        else:
-            return True
-
-    def get(self):
-        try:
-            return BusPacket.from_raw(self.raw_packet)
-        except:
-            return None
-
-    def send(self, char):
-        byte = ord(char)
-        if self.start:
-            if self.length is None:
-                self.length = byte
-            self.raw_packet.append(byte)
-            self.length -= 1
-            if self.length > 0:
-                return False
-            else:
-                return True
-        if (
-            not self.start and
-            self.prev_byte is not None and
-            bytearray([self.prev_byte, byte]) == _bus_head
-        ):
-            self.start = True
-            self.raw_packet.extend(_bus_head)
-        self.prev_byte = byte
-        return False
-
-
 class BusPacket(object):
     src_netid = 0xbb
     src_devid = 0xbb
@@ -126,7 +82,7 @@ class BusPacket(object):
     def from_raw(cls, raw_packet):
         self = object.__new__(cls)
         packet = bytearray(raw_packet)
-        if not packet.startswith(_bus_head):
+        if not packet.startswith(START_CODE):
             raise Exception('Not SmartBus packet')
         self.big = True if packet[2] == 0xff else False
         packet_len = len(packet) - 2
@@ -194,13 +150,13 @@ class BusPacket(object):
         data = bytearray(self.data)
         if self.big:
             big_len = bytearray([len(self.data) + 2])
-            packed = _join_bytearrays(_bus_head, length, src, src_devtype,
+            packed = _join_bytearrays(START_CODE, length, src, src_devtype,
                 opcode, dst, big_len, data)
         else:
             body = _join_bytearrays(length, src, src_devtype, opcode, dst,
                 data)
             crc = bytearray(struct.pack(b'!H', _crc(body)))
-            packed = _join_bytearrays(_bus_head, body, crc)
+            packed = _join_bytearrays(START_CODE, body, crc)
         return bytes(packed)
 
 
