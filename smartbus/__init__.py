@@ -53,13 +53,16 @@ receiver = None
 sender = None
 
 
-def init(header=None, no_sender=False):
+def init(header=None, src_ipaddress=None, no_sender=False):
     from ._handle import Distributor, Receiver
 
     global device_list, distributor, pause, receiver, resume, sender
 
     if header:
         Packet.header = header
+
+    if src_ipaddress:
+        Packet.src_ipaddress = src_ipaddress
 
     device_list = Device.list
 
