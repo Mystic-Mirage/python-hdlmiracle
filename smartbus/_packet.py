@@ -225,7 +225,7 @@ class Packet(with_metaclass(_SourceIPMeta, BusPacket)):
 
         self = BusPacket.__new__(cls, opcode, data, netid, devid, src_netid,
             src_devid, src_devtype, big)
-        if src_ipaddress is not None:
+        if src_ipaddress:
             self.src_ipaddress = src_ipaddress
         if header:
             self.header = header

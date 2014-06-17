@@ -16,7 +16,7 @@ class Bus(object):
         self.serial = Serial(port, timeout=1)
         self.direction_in = direction_in
         self.direction_out = direction_out
-        if self.direction_in is not None:
+        if self.direction_in:
             self.direction_in()
 
     def recv(self):
@@ -32,10 +32,10 @@ class Bus(object):
         return bus_packet
 
     def send(self, data):
-        if self.direction_out is not None:
+        if self.direction_out:
             self.direction_out()
         self.serial.write(data)
-        if self.direction_in is not None:
+        if self.direction_in:
             self.direction_in()
 
     def close(self):
@@ -58,9 +58,9 @@ class Distributor(Thread):
             except Empty:
                 pass
             else:
-                if bus_packet is not None:
+                if bus_packet:
                     packet = bus_packet.get()
-                    if packet is not None:
+                    if packet:
                         for device in self.device_list:
                             device.receive(packet)
 

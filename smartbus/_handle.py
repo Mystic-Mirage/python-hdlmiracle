@@ -31,7 +31,7 @@ class Distributor(Thread):
             except Empty:
                 pass
             else:
-                if raw_packet is not None:
+                if raw_packet:
                     for device in self.device_list:
                         device.receive(Packet.from_raw(raw_packet))
 
