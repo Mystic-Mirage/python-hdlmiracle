@@ -214,10 +214,10 @@ class Packet(with_metaclass(_SourceIPMeta, BusPacket)):
 
     @classmethod
     def _set_src_ipaddress(cls, ipaddress):
-        if type(ipaddress) == IPv4Address:
+        if type(ipaddress) is IPv4Address:
             cls._src_ipaddress = ipaddress
         else:
-            cls._src_ipaddress = IPv4Address(ipaddress)
+            cls._src_ipaddress = IPv4Address(str(ipaddress))
 
     def __new__(cls, opcode=OC_SEARCH, data=[], netid=ALL_NETWORKS,
         devid=ALL_DEVICES, src_netid=None, src_devid=None, src_devtype=None,
@@ -263,7 +263,7 @@ class Packet(with_metaclass(_SourceIPMeta, BusPacket)):
 
     @src_ipaddress.setter
     def src_ipaddress(self, ipaddress):
-        if type(ipaddress) == IPv4Address:
+        if type(ipaddress) is IPv4Address:
             self._src_ipaddress = ipaddress
         else:
-            self._src_ipaddress = IPv4Address(ipaddress)
+            self._src_ipaddress = IPv4Address(str(ipaddress))
