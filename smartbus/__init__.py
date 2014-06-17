@@ -90,7 +90,7 @@ def pause():
 
 
 def resume():
-    global distrubutor
+    global distributor
     if distributor:
         distributor.resume()
 
