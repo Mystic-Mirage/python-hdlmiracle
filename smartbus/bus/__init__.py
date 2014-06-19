@@ -1,5 +1,3 @@
-from __future__ import absolute_import
-
 from ._device import Device
 
 
@@ -53,6 +51,3 @@ def quit():
     del sender
     del distributor
     del send
-
-
-del absolute_import

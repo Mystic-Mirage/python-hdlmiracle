@@ -1,5 +1,3 @@
-from __future__ import absolute_import
-
 from .._packet import BusPacket, START_CODE
 
 

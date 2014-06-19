@@ -1,5 +1,3 @@
-from __future__ import absolute_import
-
 from ._device import Device, TYPES
 from ._opcode import (
     OC_CHANNEL_CONTROL,
@@ -121,6 +119,3 @@ def quit():
 
         del sender
         del send
-
-
-del absolute_import
