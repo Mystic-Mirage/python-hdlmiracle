@@ -1,6 +1,5 @@
 from future import standard_library
 standard_library.install_hooks()
-from future.builtins import super
 
 from queue import Empty, Queue
 import socket
@@ -13,7 +12,7 @@ from ._packet import Packet
 class Distributor(Thread):
 
     def __init__(self, receiver, device_list):
-        super().__init__()
+        Thread.__init__(self)
         self.receiver = receiver
         self.device_list = device_list
 

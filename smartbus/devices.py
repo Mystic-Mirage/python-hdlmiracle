@@ -1,5 +1,3 @@
-from future.builtins import super
-
 from . import Device, OC_CHANNEL_CONTROL, Packet, sendmethod
 
 
@@ -19,7 +17,7 @@ CHANNEL_ON = 100
 class DimmerRelay(Device):
 
     def __init__(self, netid, devid, channels=[]):
-        super().__init__(netid=netid, devid=devid)
+        Device.__init__(self, netid=netid, devid=devid)
         self._channels = {k: v for k, v in enumerate(channels, start=1)}
 
     def receive_func(self, packet):
