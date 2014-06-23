@@ -1,5 +1,4 @@
 from __future__ import print_function, unicode_literals
-from future.builtins import super
 
 from os import linesep
 from time import sleep
@@ -10,7 +9,7 @@ import smartbus
 class Listener(smartbus.Device):
 
     def __init__(self):
-        super().__init__()
+        smartbus.Device.__init__(self)
         self.lines = 24
 
     def receive_func(self, packet):
@@ -55,7 +54,7 @@ class Listener(smartbus.Device):
 
 def main():
     smartbus.init()
-    listener = Listener()
+    Listener()
     print('Smart-Bus Listener Started...')
 
     try:
