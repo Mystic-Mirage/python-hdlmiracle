@@ -1,6 +1,4 @@
-from __future__ import absolute_import
-from __future__ import division, print_function, unicode_literals
-from future.builtins import *
+from __future__ import print_function, unicode_literals
 
 from time import sleep
 
@@ -10,7 +8,7 @@ import smartbus
 class ZoneBeastFixer(smartbus.Device):
 
     def __init__(self, netid, devid):
-        super().__init__(netid=netid, devid=devid)
+        smartbus.Device.__init__(self, netid=netid, devid=devid)
         self.channels = None
         self.channels_num = None
 
