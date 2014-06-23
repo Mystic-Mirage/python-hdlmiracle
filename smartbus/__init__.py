@@ -1,4 +1,4 @@
-from ._device import Device, TYPES
+from ._device import Device, TYPES, device_list
 from ._opcode import (
     OC_CHANNEL_CONTROL,
     OC_CHANNEL_CONTROL_R,
@@ -16,7 +16,7 @@ from ._packet import (
     HEADERS,
     SMARTCLOUD,
     BusPacket,
-    Packet
+    Packet,
 )
 
 
@@ -38,6 +38,7 @@ __all__ = [
     'BusPacket',
     'Device',
     'Packet',
+    'device_list',
     'init',
     'quit',
     'sendmethod',
@@ -52,15 +53,13 @@ sender = None
 def init(header=None, src_ipaddress=None, no_sender=False):
     from ._handle import Distributor, Receiver
 
-    global device_list, distributor, pause, receiver, resume, sender
+    global distributor, pause, receiver, resume, sender
 
     if header:
         Packet.header = header
 
     if src_ipaddress:
         Packet.src_ipaddress = src_ipaddress
-
-    device_list = Device.list
 
     receiver = Receiver()
     receiver.daemon = True
@@ -101,7 +100,7 @@ def sendmethod(func):
 
 
 def quit():
-    global device_list, distributor, receiver, send, sender
+    global distributor, receiver, send, sender
 
     receiver.stop()
     receiver.join()
@@ -109,7 +108,6 @@ def quit():
     distributor.stop()
     distributor.join()
 
-    del device_list
     del receiver
     del distributor
 

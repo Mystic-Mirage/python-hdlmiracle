@@ -26,22 +26,10 @@ TYPES = {
 }
 
 
+device_list = []
+
+
 class Device(object):
-    list = []
-
-    @staticmethod
-    def append(device):
-        if device not in Device.list:
-            Device.list.append(device)
-        else:
-            raise Exception('Device already registered')
-
-    @staticmethod
-    def remove(device):
-        if device in Device.list:
-            Device.list.remove(device)
-        else:
-            raise Exception('Device not registered')
 
     @staticmethod
     def type_info(devtype):
@@ -86,10 +74,12 @@ class Device(object):
         pass
 
     def register(self):
-        self.append(self)
+        if self not in device_list:
+            device_list.append(self)
 
     def send_func(self, packet):
         pass
 
     def unregister(self):
-        self.remove(self)
+        if self in device_list:
+            device_list.remove(self)
