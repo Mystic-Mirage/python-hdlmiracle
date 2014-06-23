@@ -1,6 +1,6 @@
 from __future__ import unicode_literals
-from future.builtins import str
-from future.utils import with_metaclass
+from future.builtins import bytes, str
+from future.utils import python_2_unicode_compatible, with_metaclass
 
 from ipaddress import IPv4Address
 import struct
@@ -10,12 +10,6 @@ from ._opcode import OC_SEARCH
 
 ALL_NETWORKS = 255
 ALL_DEVICES = 255
-
-CREEPYFROG = bytes(b'CREEPYFROG')
-HDLMIRACLE = bytes(b'HDLMIRACLE')
-SMARTCLOUD = bytes(b'SMARTCLOUD')
-
-HEADERS = [HDLMIRACLE, SMARTCLOUD]
 
 START_CODE = bytes(b'\xaa\xaa')
 
@@ -31,10 +25,6 @@ def _crc(packet_array):
                 checksum = checksum << 1
         checksum = checksum & 0xffff
     return checksum
-
-
-def _join_bytearrays(*args):
-    return bytearray.join(bytearray(), args)
 
 
 class _ClassProperty(object):
@@ -112,14 +102,33 @@ class BusPacket(object):
                     raise Exception('Wrong checksum')
         return self
 
+    def _list_args(self):
+        params = [
+            'opcode={0}'.format(self.opcode_hex),
+            'data={0}'.format(self.data),
+            'netid={0}'.format(self.netid),
+            'devid={0}'.format(self.devid),
+            'src_netid={0}'.format(self.src_netid),
+            'src_devid={0}'.format(self.src_devid),
+            'src_devtype={0}'.format(self.src_devtype),
+        ]
+        if self.big:
+            params.append('big=True')
+        return params
+
+    def __repr__(self):
+        _params = ', '.join(self._list_args())
+        return '{0}.{1}({2})'.format(self.__class__.__module__,
+            self.__class__.__name__, _params)
+
     def crc(self):
-        packet_array = _join_bytearrays(
-            bytearray([self.length(), self.src_netid, self.src_devid]),
+        packet_array = bytearray().join((
+            bytearray((self.length(), self.src_netid, self.src_devid)),
             bytearray(struct.pack(b'!H', self.src_devtype)),
             bytearray(struct.pack(b'!H', self.opcode)),
-            bytearray([self.netid, self.devid]),
+            bytearray((self.netid, self.devid)),
             bytearray(self.data)
-        )
+        ))
         return _crc(packet_array)
 
     def length(self):
@@ -141,27 +150,57 @@ class BusPacket(object):
         return format(self.opcode, '04x')
 
     def packed(self):
-        src = bytearray([self.src_netid, self.src_devid])
+        src = bytearray((self.src_netid, self.src_devid))
         src_devtype = bytearray(struct.pack(b'!H', self.src_devtype))
         opcode = bytearray(struct.pack(b'!H', self.opcode))
-        dst = bytearray([self.netid, self.devid])
-        length = bytearray([self.length()])
+        dst = bytearray((self.netid, self.devid))
+        length = bytearray((self.length(),))
         data = bytearray(self.data)
         if self.big:
-            big_len = bytearray([len(self.data) + 2])
-            packed = _join_bytearrays(START_CODE, length, src, src_devtype,
-                opcode, dst, big_len, data)
+            big_len = bytearray((len(self.data) + 2,))
+            packed = bytearray().join((START_CODE, length, src, src_devtype,
+                opcode, dst, big_len, data))
         else:
-            body = _join_bytearrays(length, src, src_devtype, opcode, dst,
-                data)
+            body = bytearray().join((length, src, src_devtype, opcode, dst,
+                data))
             crc = bytearray(struct.pack(b'!H', _crc(body)))
-            packed = _join_bytearrays(START_CODE, body, crc)
+            packed = bytearray().join((START_CODE, body, crc))
         return bytes(packed)
+
+
+class Header(object):
+
+    def __init__(self, header):
+        if type(header) is bytearray:
+            self._header = bytes(header[:10].ljust(10))
+        elif type(header) is bytes:
+            self._header = header[:10].ljust(10)
+        elif type(header) is Header:
+            self._header = header._header[:]
+        else:
+            self._header = bytes(str(header)[:10].ljust(10).encode())
+
+    def __iter__(self):
+        return iter(self._header)
+
+    def __repr__(self):
+        return str(self)
+
+    @python_2_unicode_compatible
+    def __str__(self):
+        return self._header.decode()
+
+
+CREEPYFROG = Header('CREEPYFROG')
+HDLMIRACLE = Header('HDLMIRACLE')
+SMARTCLOUD = Header('SMARTCLOUD')
+
+HEADERS = [HDLMIRACLE, SMARTCLOUD]
 
 
 class Packet(with_metaclass(_SourceIPMeta, BusPacket)):
     _src_ipaddress = IPv4Address('127.0.0.1')
-    header = SMARTCLOUD
+    _header = SMARTCLOUD
 
     @classmethod
     def _get_src_ipaddress(cls):
@@ -183,7 +222,7 @@ class Packet(with_metaclass(_SourceIPMeta, BusPacket)):
         if src_ipaddress:
             self.src_ipaddress = src_ipaddress
         if header:
-            self.header = header
+            self.header = Header(header)
         return self
 
     @classmethod
@@ -199,18 +238,33 @@ class Packet(with_metaclass(_SourceIPMeta, BusPacket)):
         bus_packet = BusPacket.from_raw(packet[14:])
         self = Packet.from_bus(bus_packet)
         self.src_ipaddress = IPv4Address('.'.join(map(str, packet[:4])))
-        self.header = packet[4:14]
+        self.header = Header(packet[4:14])
         return self
+
+    def _list_args(self):
+        params = BusPacket._list_args(self)
+        params.append("src_ipaddress='{0}'".format(self.src_ipaddress))
+        params.append("header='{0}'".format(self.header))
+        return params
 
     def packed(self):
         src_ipaddress = bytearray(self.src_ipaddress.packed)
         bus_packet = bytearray(BusPacket.packed(self))
-        packed = _join_bytearrays(src_ipaddress, self.header, bus_packet)
+        packed = bytearray().join((src_ipaddress, bytearray(self.header),
+            bus_packet))
         return bytes(packed)
 
     def to_bus(self):
         return BusPacket(self.opcode, self.data, self.netid, self.devid,
             self.src_netid, self.src_devid, self.src_devtype, self.big)
+
+    @property
+    def header(self):
+        return self._header
+
+    @header.setter
+    def header(self, header):
+        self._header = Header(header)
 
     @property
     def src_ipaddress(self):

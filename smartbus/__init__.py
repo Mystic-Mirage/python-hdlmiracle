@@ -15,7 +15,7 @@ from ._packet import (
     HDLMIRACLE,
     HEADERS,
     SMARTCLOUD,
-    BusPacket,
+    Header,
     Packet,
 )
 
@@ -35,14 +35,18 @@ __all__ = [
     'OC_SEARCH_R',
     'SMARTCLOUD',
     'TYPES',
-    'BusPacket',
     'Device',
+    'Header',
     'Packet',
     'device_list',
     'init',
     'quit',
     'sendmethod',
 ]
+
+
+Header.__module__ = __name__
+Packet.__module__ = __name__
 
 
 distrubutor = None
@@ -53,7 +57,7 @@ sender = None
 def init(header=None, src_ipaddress=None, no_sender=False):
     from ._handle import Distributor, Receiver
 
-    global distributor, pause, receiver, resume, sender
+    global distributor, receiver
 
     if header:
         Packet.header = header
@@ -71,7 +75,7 @@ def init(header=None, src_ipaddress=None, no_sender=False):
 
     if not no_sender:
         from ._handle import Sender
-        global send, sendmethod
+        global send, sender
         sender = Sender()
         send = sender.put
         sender.daemon = True
@@ -79,20 +83,20 @@ def init(header=None, src_ipaddress=None, no_sender=False):
 
 
 def pause():
-    global distributor
     if distributor:
         distributor.pause()
 
 
 def resume():
-    global distributor
     if distributor:
         distributor.resume()
 
 
-def sendmethod(func):
-    global device_list, send, sender
+def send(_):
+    pass
 
+
+def sendmethod(func):
     def wrapper(obj, *args, **kwargs):
         if sender and obj in device_list:
             return send(func(obj, *args, **kwargs))
@@ -100,20 +104,12 @@ def sendmethod(func):
 
 
 def quit():
-    global distributor, receiver, send, sender
-
     receiver.stop()
     receiver.join()
 
     distributor.stop()
     distributor.join()
 
-    del receiver
-    del distributor
-
     if sender:
         sender.stop()
         sender.join()
-
-        del sender
-        del send
