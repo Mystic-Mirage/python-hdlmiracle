@@ -46,6 +46,7 @@ __all__ = [
 ]
 
 
+Device.__module__ = __name__
 Header.__module__ = __name__
 Packet.__module__ = __name__
 
