@@ -1,6 +1,4 @@
-from __future__ import absolute_import
-from __future__ import division, print_function, unicode_literals
-from future.builtins import *
+from __future__ import print_function, unicode_literals
 
 from time import sleep
 
@@ -10,7 +8,7 @@ import smartbus
 class Searcher(smartbus.Device):
 
     def __init__(self):
-        super().__init__()
+        smartbus.Device.__init__(self)
         self.found = []
 
     def receive_func(self, packet):
@@ -26,7 +24,7 @@ class Searcher(smartbus.Device):
                     ' {0.src_devtype:-5d}   '
                     '{1[0]:14s}  ({1[1]})'.format(
                         packet,
-                        smartbus.Device.type_info(packet.src_devtype)
+                        smartbus.devtype_details(packet.src_devtype)
                     )
                 )
 

@@ -1,5 +1,6 @@
 from threading import Event
 
+
 TYPES = {
     32: ('SB-DMX48-DN', 'DMX48'),
     112: ('SB-DN-HVAC', 'HVAC Module'),
@@ -29,14 +30,11 @@ TYPES = {
 device_list = []
 
 
-class Device(object):
+def devtype_details(devtype):
+    return TYPES.get(devtype, ('Unknown', 'Unknown'))
 
-    @staticmethod
-    def type_info(devtype):
-        if devtype in TYPES:
-            return TYPES[devtype]
-        else:
-            return ('Unknown', 'Unknown')
+
+class Device(object):
 
     def __init__(self, netid=None, devid=None, devtype=None, register=True):
         self._devtype = devtype
@@ -52,8 +50,8 @@ class Device(object):
         return self._devtype
 
     @property
-    def info(self):
-        return self.type_info(self.devtype)
+    def devtype_details(self):
+        return devtype_details(self.devtype)
 
     def receive(self, packet):
         if (

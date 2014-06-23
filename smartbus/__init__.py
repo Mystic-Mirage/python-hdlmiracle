@@ -1,4 +1,4 @@
-from ._device import Device, TYPES, device_list
+from ._device import Device, TYPES, devtype_details, device_list
 from ._opcode import (
     OC_CHANNEL_CONTROL,
     OC_CHANNEL_CONTROL_R,
@@ -38,6 +38,7 @@ __all__ = [
     'Device',
     'Header',
     'Packet',
+    'devtype_details',
     'device_list',
     'init',
     'quit',
