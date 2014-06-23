@@ -6,15 +6,15 @@ import socket
 from threading import Thread
 from time import sleep
 
+from ._device import device_list
 from ._packet import Packet
 
 
 class Distributor(Thread):
 
-    def __init__(self, receiver, device_list):
+    def __init__(self, receiver):
         Thread.__init__(self)
         self.receiver = receiver
-        self.device_list = device_list
 
     def run(self):
         self.running = True
@@ -30,7 +30,7 @@ class Distributor(Thread):
                 pass
             else:
                 if raw_packet:
-                    for device in self.device_list:
+                    for device in device_list:
                         device.receive(Packet.from_raw(raw_packet))
 
     def pause(self):

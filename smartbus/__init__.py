@@ -71,7 +71,7 @@ def init(header=None, src_ipaddress=None, no_sender=False):
     receiver.daemon = True
     receiver.start()
 
-    distributor = Distributor(receiver, device_list)
+    distributor = Distributor(receiver)
     distributor.daemon = True
     distributor.start()
 
