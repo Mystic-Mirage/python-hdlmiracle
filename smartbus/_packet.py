@@ -49,9 +49,11 @@ class BusPacket(object):
     src_devid = 0xbb
     src_devtype = 0xdddd
 
-    def __new__(cls, opcode=OC_SEARCH, data=[], netid=ALL_NETWORKS,
+    def __new__(
+        cls, opcode=OC_SEARCH, data=[], netid=ALL_NETWORKS,
         devid=ALL_DEVICES, src_netid=None, src_devid=None, src_devtype=None,
-        big=False):
+        big=False
+    ):
 
         self = object.__new__(cls)
         self.opcode = opcode
@@ -76,8 +78,10 @@ class BusPacket(object):
         self.big = True if packet[2] == 0xff else False
         packet_len = len(packet) - 2
         if not self.big and packet_len != packet[2]:
-            raise Exception('Wrong packet length ({0}). '
-                'Expected value is {1}'.format(packet[2], packet_len))
+            raise Exception(
+                'Wrong packet length ({0}). '
+                'Expected value is {1}'.format(packet[2], packet_len)
+            )
         else:
             if self.big:
                 packet_body = packet[3:]
@@ -94,8 +98,10 @@ class BusPacket(object):
                 self.data = list(packet_body[10:])
                 big_len = len(self.data) + 2
                 if big_len0 != big_len:
-                    raise Exception('Wrong packet length ({0}). '
-                        'Expected {1}'.format(big_len0, big_len))
+                    raise Exception(
+                        'Wrong packet length ({0}). '
+                        'Expected {1}'.format(big_len0, big_len)
+                    )
             else:
                 self.data = list(packet_body[8:])
                 if packet[-2] << 8 | packet[-1] != self.crc():
@@ -118,8 +124,9 @@ class BusPacket(object):
 
     def __repr__(self):
         _params = ', '.join(self._list_args())
-        return '{0}.{1}({2})'.format(self.__class__.__module__,
-            self.__class__.__name__, _params)
+        return '{0}.{1}({2})'.format(
+            self.__class__.__module__, self.__class__.__name__, _params
+        )
 
     def crc(self):
         packet_array = bytearray().join((
@@ -158,11 +165,14 @@ class BusPacket(object):
         data = bytearray(self.data)
         if self.big:
             big_len = bytearray((len(self.data) + 2,))
-            packed = bytearray().join((START_CODE, length, src, src_devtype,
-                opcode, dst, big_len, data))
+            packed = bytearray().join((
+                START_CODE, length, src, src_devtype, opcode, dst, big_len,
+                data
+            ))
         else:
-            body = bytearray().join((length, src, src_devtype, opcode, dst,
-                data))
+            body = bytearray().join((
+                length, src, src_devtype, opcode, dst, data
+            ))
             crc = bytearray(struct.pack(b'!H', _crc(body)))
             packed = bytearray().join((START_CODE, body, crc))
         return bytes(packed)
@@ -213,12 +223,16 @@ class Packet(with_metaclass(_SourceIPMeta, BusPacket)):
         else:
             cls._src_ipaddress = IPv4Address(str(ipaddress))
 
-    def __new__(cls, opcode=OC_SEARCH, data=[], netid=ALL_NETWORKS,
+    def __new__(
+        cls, opcode=OC_SEARCH, data=[], netid=ALL_NETWORKS,
         devid=ALL_DEVICES, src_netid=None, src_devid=None, src_devtype=None,
-        big=False, src_ipaddress=None, header=None):
+        big=False, src_ipaddress=None, header=None
+    ):
 
-        self = BusPacket.__new__(cls, opcode, data, netid, devid, src_netid,
-            src_devid, src_devtype, big)
+        self = BusPacket.__new__(
+            cls, opcode, data, netid, devid, src_netid, src_devid, src_devtype,
+            big
+        )
         if src_ipaddress:
             self.src_ipaddress = src_ipaddress
         if header:
@@ -227,9 +241,11 @@ class Packet(with_metaclass(_SourceIPMeta, BusPacket)):
 
     @classmethod
     def from_bus(cls, bus_packet):
-        self = Packet.__new__(cls, bus_packet.opcode, bus_packet.data,
-            bus_packet.netid, bus_packet.devid, bus_packet.src_netid,
-            bus_packet.src_devid, bus_packet.src_devtype, bus_packet.big)
+        self = Packet.__new__(
+            cls, bus_packet.opcode, bus_packet.data, bus_packet.netid,
+            bus_packet.devid, bus_packet.src_netid, bus_packet.src_devid,
+            bus_packet.src_devtype, bus_packet.big
+        )
         return self
 
     @classmethod
@@ -250,13 +266,16 @@ class Packet(with_metaclass(_SourceIPMeta, BusPacket)):
     def packed(self):
         src_ipaddress = bytearray(self.src_ipaddress.packed)
         bus_packet = bytearray(BusPacket.packed(self))
-        packed = bytearray().join((src_ipaddress, bytearray(self.header),
-            bus_packet))
+        packed = bytearray().join((
+            src_ipaddress, bytearray(self.header), bus_packet
+        ))
         return bytes(packed)
 
     def to_bus(self):
-        return BusPacket(self.opcode, self.data, self.netid, self.devid,
-            self.src_netid, self.src_devid, self.src_devtype, self.big)
+        return BusPacket(
+            self.opcode, self.data, self.netid, self.devid, self.src_netid,
+            self.src_devid, self.src_devtype, self.big
+        )
 
     @property
     def header(self):

@@ -55,8 +55,10 @@ class Device(object):
 
     def __repr__(self):
         _params = ', '.join(self._list_args())
-        return '{0}.{1}({2})'.format(self.__class__.__module__,
-            self.__class__.__name__, _params)
+        return '{0}.{1}({2})'.format(
+            self.__class__.__module__,
+            self.__class__.__name__, _params
+        )
 
     @property
     def devtype(self):

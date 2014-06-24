@@ -14,8 +14,10 @@ class ZoneBeastFixer(smartbus.Device):
 
     @smartbus.sendmethod
     def send(self, data, netid, devid):
-        return smartbus.Packet(smartbus.OC_CHANNELS_STATUS_R, data,
-            netid, devid, self.netid, self.devid, self.devtype)
+        return smartbus.Packet(
+            smartbus.OC_CHANNELS_STATUS_R, data, netid, devid, self.netid,
+            self.devid, self.devtype
+        )
 
     def receive_func(self, packet):
         if packet.opcode == smartbus.OC_CHANNELS_STATUS:
