@@ -51,7 +51,7 @@ Header.__module__ = __name__
 Packet.__module__ = __name__
 
 
-distrubutor = None
+distributor = None
 receiver = None
 sender = None
 
