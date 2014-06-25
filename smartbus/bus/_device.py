@@ -1,5 +1,4 @@
-from .._device import Device as Dvc
+from .._device import Device, device_list
 
 
-class Device(Dvc):
-    pass
+Device.__module__ = __name__

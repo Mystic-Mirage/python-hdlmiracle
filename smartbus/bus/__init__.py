@@ -1,12 +1,10 @@
-from ._device import Device
+from ._device import Device, device_list
 
 
 def init(port, timeout=1, direction_in=None, direction_out=None):
     from ._handle import Bus, Distributor, Receiver, Sender
 
-    global bus, device_list, distributor, receiver, send, sender
-
-    device_list = Device.list
+    global bus, distributor, receiver, send, sender
 
     bus = Bus(port, timeout, direction_in, direction_out)
     receiver = Receiver(bus)
