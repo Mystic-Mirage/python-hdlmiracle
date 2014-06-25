@@ -22,7 +22,7 @@ class Bus(object):
         bus_packet = BusPacketFromStream()
         while True:
             char = self.serial.read(1)
-            if char == b'':
+            if not char:
                 return None
             bus_packet.send(char)
             if bus_packet.length is not None:
