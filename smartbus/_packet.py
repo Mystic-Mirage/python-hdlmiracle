@@ -190,8 +190,14 @@ class Header(object):
         else:
             self._header = bytes(str(header)[:10].ljust(10).encode())
 
+    def __eq__(self, other):
+        return self._header == Header(other)._header
+
     def __iter__(self):
         return iter(self._header)
+
+    def __ne__(self, other):
+        return not self.__eq__(other)
 
     def __repr__(self):
         return str(self)
