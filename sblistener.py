@@ -1,5 +1,3 @@
-from __future__ import print_function, unicode_literals
-
 from os import linesep
 from time import sleep
 
@@ -23,10 +21,8 @@ class Listener(smartbus.Device):
         self.lines += lines_p
 
         if self.lines > 23:
-            print(
-                'netid devid devtype opcode dstnet dstdev'
-                '           hex              ascii'
-            )
+            print ('netid devid devtype opcode dstnet dstdev'
+                   '           hex              ascii')
             self.lines = lines_p + 1
 
         for d in range(0, packet_len, 8):
@@ -41,21 +37,19 @@ class Listener(smartbus.Device):
 
         datarepr_t = (linesep + ' ' * 42).join(datarepr)
 
-        print(
-            ' {0.src_netid:-3d}  '
-            ' {0.src_devid:-3d}  '
-            ' {0.src_devtype:-5d}  '
-            '{0.opcode_hex} '
-            ' {0.netid:-3d}   '
-            ' {0.devid:-3d}    '
-            '{1}'.format(packet, datarepr_t)
-        )
+        print (' {0.src_netid:-3d}  '
+               ' {0.src_devid:-3d}  '
+               ' {0.src_devtype:-5d}  '
+               '{0.opcode_hex} '
+               ' {0.netid:-3d}   '
+               ' {0.devid:-3d}    '
+               '{1}'.format(packet, datarepr_t))
 
 
 def main():
     smartbus.init()
     Listener()
-    print('Smart-Bus Listener Started...')
+    print 'Smart-Bus Listener Started...'
 
     try:
         while True:
@@ -66,7 +60,7 @@ def main():
         raise
 
     smartbus.quit()
-    print('Smart-Bus Listener Stopped...')
+    print 'Smart-Bus Listener Stopped...'
 
 
 if __name__ == '__main__':

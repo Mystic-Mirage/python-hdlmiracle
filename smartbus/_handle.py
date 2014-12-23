@@ -1,7 +1,4 @@
-from future import standard_library
-standard_library.install_hooks()
-
-from queue import Empty, Queue
+from Queue import Empty, Queue
 import socket
 from threading import Thread
 from time import sleep
@@ -86,9 +83,8 @@ class Sender(Thread):
     def run(self):
         self.queue = Queue()
 
-        sock = socket.socket(
-            socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP
-        )
+        sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM,
+                             socket.IPPROTO_UDP)
         sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
         sock.bind(('', 6000))

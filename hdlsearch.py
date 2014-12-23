@@ -1,5 +1,3 @@
-from __future__ import print_function, unicode_literals
-
 from time import sleep
 
 import smartbus
@@ -13,35 +11,28 @@ class Searcher(smartbus.Device):
 
     def receive_func(self, packet):
         if packet.opcode == smartbus.OC_SEARCH_R:
-            device_identify = (
-                packet.src_netid, packet.src_devid, packet.src_devtype
-            )
+            device_identify = (packet.src_netid, packet.src_devid,
+                               packet.src_devtype)
             if device_identify not in self.found:
                 self.found.append(device_identify)
-                print(
-                    ' {0.src_netid:-3d}   '
-                    ' {0.src_devid:-3d}   '
-                    ' {0.src_devtype:-5d}   '
-                    '{1[0]:14s}  ({1[1]})'.format(
-                        packet,
-                        smartbus.devtype_details(packet.src_devtype)
-                    )
-                )
+                devtype_details = smartbus.devtype_details(packet.src_devtype)
+                print (' {0.src_netid:-3d}   '
+                       ' {0.src_devid:-3d}   '
+                       ' {0.src_devtype:-5d}   '
+                       '{1[0]:14s}  ({1[1]})'.format(packet, devtype_details))
 
     @smartbus.sendmethod
     def search_request(self):
-        return smartbus.Packet(
-            opcode=smartbus.OC_SEARCH,
-            netid=smartbus.ALL_NETWORKS,
-            devid=smartbus.ALL_DEVICES
-        )
+        return smartbus.Packet(opcode=smartbus.OC_SEARCH,
+                               netid=smartbus.ALL_NETWORKS,
+                               devid=smartbus.ALL_DEVICES)
 
 
 def main():
     smartbus.init(header=smartbus.HDLMIRACLE)
 
     searcher = Searcher()
-    print('netid  devid  devtype           device_info')
+    print 'netid  devid  devtype           device_info'
 
     try:
         while True:

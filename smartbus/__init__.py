@@ -7,7 +7,7 @@ from ._opcode import (
     OC_CHANNELS_STATUS_R,
     OC_SEARCH,
     OC_SEARCH_R,
-)
+    )
 from ._packet import (
     ALL_DEVICES,
     ALL_NETWORKS,
@@ -17,7 +17,7 @@ from ._packet import (
     SMARTCLOUD,
     Header,
     Packet,
-)
+    )
 
 
 __all__ = [
@@ -43,7 +43,7 @@ __all__ = [
     'init',
     'quit',
     'sendmethod',
-]
+    ]
 
 
 Device.__module__ = __name__

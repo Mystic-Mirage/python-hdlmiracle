@@ -1,9 +1,6 @@
-from __future__ import unicode_literals
-from future.builtins import bytes, str
-from future.utils import python_2_unicode_compatible, with_metaclass
+import struct
 
 from ipaddress import IPv4Address
-import struct
 
 from ._opcode import OC_SEARCH
 
@@ -11,7 +8,7 @@ from ._opcode import OC_SEARCH
 ALL_NETWORKS = 255
 ALL_DEVICES = 255
 
-START_CODE = bytes(b'\xaa\xaa')
+START_CODE = '\xaa\xaa'
 
 
 def _crc(packet_array):
@@ -49,12 +46,9 @@ class BusPacket(object):
     src_devid = 0xbb
     src_devtype = 0xdddd
 
-    def __new__(
-        cls, opcode=OC_SEARCH, data=[], netid=ALL_NETWORKS,
-        devid=ALL_DEVICES, src_netid=None, src_devid=None, src_devtype=None,
-        big=False
-    ):
-
+    def __new__(cls, opcode=OC_SEARCH, data=[], netid=ALL_NETWORKS,
+                devid=ALL_DEVICES, src_netid=None, src_devid=None,
+                src_devtype=None, big=False):
         self = object.__new__(cls)
         self.opcode = opcode
         self.data = list(data)
@@ -78,10 +72,9 @@ class BusPacket(object):
         self.big = True if packet[2] == 0xff else False
         packet_len = len(packet) - 2
         if not self.big and packet_len != packet[2]:
-            raise Exception(
-                'Wrong packet length ({0}). '
-                'Expected value is {1}'.format(packet[2], packet_len)
-            )
+            raise Exception('Wrong packet length ({0}). '
+                            'Expected value is {1}'.format(packet[2],
+                                                           packet_len))
         else:
             if self.big:
                 packet_body = packet[3:]
@@ -98,10 +91,8 @@ class BusPacket(object):
                 self.data = list(packet_body[10:])
                 big_len = len(self.data) + 2
                 if big_len0 != big_len:
-                    raise Exception(
-                        'Wrong packet length ({0}). '
-                        'Expected {1}'.format(big_len0, big_len)
-                    )
+                    raise Exception('Wrong packet length ({0}). '
+                                    'Expected {1}'.format(big_len0, big_len))
             else:
                 self.data = list(packet_body[8:])
                 if packet[-2] << 8 | packet[-1] != self.crc():
@@ -117,25 +108,24 @@ class BusPacket(object):
             'src_netid={0}'.format(self.src_netid),
             'src_devid={0}'.format(self.src_devid),
             'src_devtype={0}'.format(self.src_devtype),
-        ]
+            ]
         if self.big:
             params.append('big=True')
         return params
 
     def __repr__(self):
         _params = ', '.join(self._list_args())
-        return '{0}.{1}({2})'.format(
-            self.__class__.__module__, self.__class__.__name__, _params
-        )
+        return '{0}.{1}({2})'.format(self.__class__.__module__,
+                                     self.__class__.__name__, _params)
 
     def crc(self):
         packet_array = bytearray().join((
             bytearray((self.length(), self.src_netid, self.src_devid)),
-            bytearray(struct.pack(b'!H', self.src_devtype)),
-            bytearray(struct.pack(b'!H', self.opcode)),
+            bytearray(struct.pack('!H', self.src_devtype)),
+            bytearray(struct.pack('!H', self.opcode)),
             bytearray((self.netid, self.devid)),
             bytearray(self.data)
-        ))
+            ))
         return _crc(packet_array)
 
     def length(self):
@@ -158,22 +148,19 @@ class BusPacket(object):
 
     def packed(self):
         src = bytearray((self.src_netid, self.src_devid))
-        src_devtype = bytearray(struct.pack(b'!H', self.src_devtype))
-        opcode = bytearray(struct.pack(b'!H', self.opcode))
+        src_devtype = bytearray(struct.pack('!H', self.src_devtype))
+        opcode = bytearray(struct.pack('!H', self.opcode))
         dst = bytearray((self.netid, self.devid))
         length = bytearray((self.length(),))
         data = bytearray(self.data)
         if self.big:
             big_len = bytearray((len(self.data) + 2,))
-            packed = bytearray().join((
-                START_CODE, length, src, src_devtype, opcode, dst, big_len,
-                data
-            ))
+            packed = bytearray().join((START_CODE, length, src, src_devtype,
+                                       opcode, dst, big_len, data))
         else:
-            body = bytearray().join((
-                length, src, src_devtype, opcode, dst, data
-            ))
-            crc = bytearray(struct.pack(b'!H', _crc(body)))
+            body = bytearray().join((length, src, src_devtype, opcode, dst,
+                                     data))
+            crc = bytearray(struct.pack('!H', _crc(body)))
             packed = bytearray().join((START_CODE, body, crc))
         return bytes(packed)
 
@@ -181,14 +168,10 @@ class BusPacket(object):
 class Header(object):
 
     def __init__(self, header):
-        if type(header) is bytearray:
-            self._header = bytes(header[:10].ljust(10))
-        elif type(header) is bytes:
-            self._header = header[:10].ljust(10)
-        elif type(header) is Header:
+        if type(header) is Header:
             self._header = header._header[:]
         else:
-            self._header = bytes(str(header)[:10].ljust(10).encode())
+            self._header = header[:10].ljust(10)
 
     def __eq__(self, other):
         return self._header == Header(other)._header
@@ -202,9 +185,8 @@ class Header(object):
     def __repr__(self):
         return str(self)
 
-    @python_2_unicode_compatible
     def __str__(self):
-        return self._header.decode()
+        return self._header
 
 
 CREEPYFROG = Header('CREEPYFROG')
@@ -214,8 +196,9 @@ SMARTCLOUD = Header('SMARTCLOUD')
 HEADERS = [HDLMIRACLE, SMARTCLOUD]
 
 
-class Packet(with_metaclass(_SourceIPMeta, BusPacket)):
-    _src_ipaddress = IPv4Address('127.0.0.1')
+class Packet(BusPacket):
+    __metaclass__ = _SourceIPMeta
+    _src_ipaddress = IPv4Address(u'127.0.0.1')
     _header = SMARTCLOUD
 
     @classmethod
@@ -229,16 +212,11 @@ class Packet(with_metaclass(_SourceIPMeta, BusPacket)):
         else:
             cls._src_ipaddress = IPv4Address(str(ipaddress))
 
-    def __new__(
-        cls, opcode=OC_SEARCH, data=[], netid=ALL_NETWORKS,
-        devid=ALL_DEVICES, src_netid=None, src_devid=None, src_devtype=None,
-        big=False, src_ipaddress=None, header=None
-    ):
-
-        self = BusPacket.__new__(
-            cls, opcode, data, netid, devid, src_netid, src_devid, src_devtype,
-            big
-        )
+    def __new__(cls, opcode=OC_SEARCH, data=[], netid=ALL_NETWORKS,
+                devid=ALL_DEVICES, src_netid=None, src_devid=None,
+                src_devtype=None, big=False, src_ipaddress=None, header=None):
+        self = BusPacket.__new__(cls, opcode, data, netid, devid, src_netid,
+                                 src_devid, src_devtype, big)
         if src_ipaddress:
             self.src_ipaddress = src_ipaddress
         if header:
@@ -247,11 +225,10 @@ class Packet(with_metaclass(_SourceIPMeta, BusPacket)):
 
     @classmethod
     def from_bus(cls, bus_packet):
-        self = Packet.__new__(
-            cls, bus_packet.opcode, bus_packet.data, bus_packet.netid,
-            bus_packet.devid, bus_packet.src_netid, bus_packet.src_devid,
-            bus_packet.src_devtype, bus_packet.big
-        )
+        self = Packet.__new__(cls, bus_packet.opcode, bus_packet.data,
+                              bus_packet.netid, bus_packet.devid,
+                              bus_packet.src_netid, bus_packet.src_devid,
+                              bus_packet.src_devtype, bus_packet.big)
         return self
 
     @classmethod
@@ -259,7 +236,7 @@ class Packet(with_metaclass(_SourceIPMeta, BusPacket)):
         packet = bytearray(raw_packet)
         bus_packet = BusPacket.from_raw(packet[14:])
         self = Packet.from_bus(bus_packet)
-        self.src_ipaddress = IPv4Address('.'.join(map(str, packet[:4])))
+        self.src_ipaddress = IPv4Address(u'.'.join(map(str, packet[:4])))
         self.header = Header(packet[4:14])
         return self
 
@@ -272,16 +249,14 @@ class Packet(with_metaclass(_SourceIPMeta, BusPacket)):
     def packed(self):
         src_ipaddress = bytearray(self.src_ipaddress.packed)
         bus_packet = bytearray(BusPacket.packed(self))
-        packed = bytearray().join((
-            src_ipaddress, bytearray(self.header), bus_packet
-        ))
+        packed = bytearray().join((src_ipaddress, bytearray(self.header),
+                                   bus_packet))
         return bytes(packed)
 
     def to_bus(self):
-        return BusPacket(
-            self.opcode, self.data, self.netid, self.devid, self.src_netid,
-            self.src_devid, self.src_devtype, self.big
-        )
+        return BusPacket(self.opcode, self.data, self.netid, self.devid,
+                         self.src_netid, self.src_devid, self.src_devtype,
+                         self.big)
 
     @property
     def header(self):
@@ -300,4 +275,4 @@ class Packet(with_metaclass(_SourceIPMeta, BusPacket)):
         if type(ipaddress) is IPv4Address:
             self._src_ipaddress = ipaddress
         else:
-            self._src_ipaddress = IPv4Address(str(ipaddress))
+            self._src_ipaddress = IPv4Address(unicode(ipaddress))

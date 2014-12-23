@@ -24,7 +24,7 @@ TYPES = {
     1201: ('SB-RSIP-DN', 'RS232IP Module'),
     3049: ('SB-SEC250K-DN', 'Security Module'),
     5020: ('SB-ZMix23-DN', 'Zone Beast Mix23'),
-}
+    }
 
 
 device_list = []
@@ -50,15 +50,13 @@ class Device(object):
             'netid={0}'.format(self.netid),
             'devid={0}'.format(self.devid),
             'devtype={0}'.format(self.devtype),
-        ]
+            ]
         return params
 
     def __repr__(self):
         _params = ', '.join(self._list_args())
-        return '{0}.{1}({2})'.format(
-            self.__class__.__module__,
-            self.__class__.__name__, _params
-        )
+        return '{0}.{1}({2})'.format(self.__class__.__module__,
+                                     self.__class__.__name__, _params)
 
     @property
     def devtype(self):
@@ -69,10 +67,8 @@ class Device(object):
         return devtype_details(self.devtype)
 
     def receive(self, packet):
-        if (
-            (self.netid is None or packet.netid in (self.netid, 255)) and
-            (self.devid is None or packet.devid in (self.devid, 255))
-        ):
+        if ((self.netid is None or packet.netid in (self.netid, 255)) and
+                (self.devid is None or packet.devid in (self.devid, 255))):
             self.receive_ready.wait()
             self.receive_ready.clear()
             self.receive_func(packet)

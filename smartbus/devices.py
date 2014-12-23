@@ -6,7 +6,7 @@ __all__ = [
     'CHANNEL_OFF',
     'CHANNEL_ON',
     'DimmerRelay',
-]
+    ]
 
 
 ALL_CHANNELS = 255
@@ -27,9 +27,8 @@ class DimmerRelay(Device):
     @sendmethod
     def _set_channel(self, channel, value):
         self._channels[channel] = value
-        return Packet(
-            OC_CHANNEL_CONTROL, (channel, value, 0, 0), self.netid, self.devid
-        )
+        return Packet(OC_CHANNEL_CONTROL, (channel, value, 0, 0), self.netid,
+                      self.devid)
 
     def channel(self, channel, value=None):
         if value is None:

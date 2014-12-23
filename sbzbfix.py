@@ -1,5 +1,3 @@
-from __future__ import print_function, unicode_literals
-
 from time import sleep
 
 import smartbus
@@ -14,10 +12,8 @@ class ZoneBeastFixer(smartbus.Device):
 
     @smartbus.sendmethod
     def send(self, data, netid, devid):
-        return smartbus.Packet(
-            smartbus.OC_CHANNELS_STATUS_R, data, netid, devid, self.netid,
-            self.devid, self.devtype
-        )
+        return smartbus.Packet(smartbus.OC_CHANNELS_STATUS_R, data, netid,
+                               devid, self.netid, self.devid, self.devtype)
 
     def receive_func(self, packet):
         if packet.opcode == smartbus.OC_CHANNELS_STATUS:
@@ -59,7 +55,7 @@ class ZoneBeastFixer(smartbus.Device):
 def main():
     smartbus.init()
     ZoneBeastFixer(1, 28)
-    print('Smart-Bus ZoneBeastFixer Started...')
+    print 'Smart-Bus ZoneBeastFixer Started...'
 
     try:
         while True:
@@ -70,7 +66,7 @@ def main():
         raise
 
     smartbus.quit()
-    print('Smart-Bus ZoneBeastFixer Stopped...')
+    print 'Smart-Bus ZoneBeastFixer Stopped...'
 
 
 if __name__ == '__main__':
