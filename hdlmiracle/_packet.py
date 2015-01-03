@@ -199,7 +199,7 @@ HEADERS = [HDLMIRACLE, SMARTCLOUD]
 class Packet(BusPacket):
     __metaclass__ = _SourceIPMeta
     _src_ipaddress = IPv4Address(u'127.0.0.1')
-    _header = SMARTCLOUD
+    _header = HDLMIRACLE
 
     @classmethod
     def _get_src_ipaddress(cls):

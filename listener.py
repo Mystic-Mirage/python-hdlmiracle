@@ -1,13 +1,13 @@
 from os import linesep
 from time import sleep
 
-import smartbus
+import hdlmiracle
 
 
-class Listener(smartbus.Device):
+class Listener(hdlmiracle.Device):
 
     def __init__(self):
-        smartbus.Device.__init__(self)
+        hdlmiracle.Device.__init__(self)
         self.lines = 24
 
     def receive_func(self, packet):
@@ -47,7 +47,7 @@ class Listener(smartbus.Device):
 
 
 def main():
-    smartbus.init()
+    hdlmiracle.init()
     Listener()
     print 'Smart-Bus Listener Started...'
 
@@ -59,7 +59,7 @@ def main():
     except:
         raise
 
-    smartbus.quit()
+    hdlmiracle.quit()
     print 'Smart-Bus Listener Stopped...'
 
 
