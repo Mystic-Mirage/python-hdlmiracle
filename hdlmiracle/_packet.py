@@ -24,21 +24,20 @@ def _crc(packet_array):
     return checksum
 
 
-class _ClassProperty(object):
+class _SourceIP(object):
 
-    def __init__(self, getter, setter):
-        self.getter = getter
-        self.setter = setter
+    def __get__(self, obj, objtype=None):
+        return obj._src_ipaddress
 
-    def __get__(self, cls, owner):
-        return getattr(cls, self.getter)()
-
-    def __set__(self, cls, value):
-        getattr(cls, self.setter)(value)
+    def __set__(self, obj, value):
+        if type(value) is IPv4Address:
+            obj._src_ipaddress = value
+        else:
+            obj._src_ipaddress = IPv4Address(unicode(value))
 
 
 class _SourceIPMeta(type):
-    src_ipaddress = _ClassProperty('_get_src_ipaddress', '_set_src_ipaddress')
+    src_ipaddress = _SourceIP()
 
 
 class BusPacket(object):
@@ -200,17 +199,7 @@ class Packet(BusPacket):
     __metaclass__ = _SourceIPMeta
     _src_ipaddress = IPv4Address(u'127.0.0.1')
     _header = HDLMIRACLE
-
-    @classmethod
-    def _get_src_ipaddress(cls):
-        return cls._src_ipaddress
-
-    @classmethod
-    def _set_src_ipaddress(cls, ipaddress):
-        if type(ipaddress) is IPv4Address:
-            cls._src_ipaddress = ipaddress
-        else:
-            cls._src_ipaddress = IPv4Address(str(ipaddress))
+    src_ipaddress = _SourceIP()
 
     def __new__(cls, opcode=OC_SEARCH, data=[], netid=ALL_NETWORKS,
                 devid=ALL_DEVICES, src_netid=None, src_devid=None,
@@ -265,14 +254,3 @@ class Packet(BusPacket):
     @header.setter
     def header(self, header):
         self._header = Header(header)
-
-    @property
-    def src_ipaddress(self):
-        return self._src_ipaddress
-
-    @src_ipaddress.setter
-    def src_ipaddress(self, ipaddress):
-        if type(ipaddress) is IPv4Address:
-            self._src_ipaddress = ipaddress
-        else:
-            self._src_ipaddress = IPv4Address(unicode(ipaddress))
