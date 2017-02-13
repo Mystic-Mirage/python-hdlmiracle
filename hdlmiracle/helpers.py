@@ -55,7 +55,7 @@ def call_lock(obj, func_name, args=None, kwargs=None, callback=None):
             args = ()
         if kwargs is None:
             kwargs = {}
-        func_lock_name = '{func_name}_lock'.format(func_name=func_name)
+        func_lock_name = '__{func_name}_lock'.format(func_name=func_name)
         if hasattr(obj, func_lock_name):
             func_lock = getattr(obj, func_lock_name)
         else:
