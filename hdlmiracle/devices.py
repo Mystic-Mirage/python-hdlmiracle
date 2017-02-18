@@ -1,8 +1,8 @@
 from collections import OrderedDict
 
-from hdlmiracle.datatypes import DeviceAddress
-from hdlmiracle.helpers import Property, ReprMixin
-from hdlmiracle.packet import Packet
+from .datatypes import DeviceAddress
+from .helpers import Property, ReprMixin
+from .packet import Packet
 
 
 __all__ = [

@@ -7,9 +7,9 @@ try:
 except ImportError:
     from socketserver import BaseRequestHandler, ThreadingUDPServer
 
-from hdlmiracle.exceptions import HDLMiracleIPBusException
-from hdlmiracle.helpers import Property, call_lock, spawn
-from hdlmiracle.packet import ALL_DEVICES, ALL_NETWORKS, IPPacket
+from .exceptions import HDLMiracleIPBusException
+from .helpers import Property, call_lock, spawn
+from .packet import ALL_DEVICES, ALL_NETWORKS, IPPacket
 
 
 __all__ = [

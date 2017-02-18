@@ -1,7 +1,6 @@
 from os import linesep
 
-from hdlmiracle.bus import IPBus
-from hdlmiracle.devices import Monitor
+from hdlmiracle import IPBus, Monitor
 
 
 class Listener(Monitor):

@@ -1,6 +1,6 @@
-from hdlmiracle.datatypes import HexWord
-from hdlmiracle.devices import Driver
-from hdlmiracle.operationcodes import CHANNEL
+from .datatypes import HexWord
+from .devices import Driver
+from .operationcodes import CHANNEL
 
 
 __all__ = [

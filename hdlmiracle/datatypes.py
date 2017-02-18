@@ -1,13 +1,10 @@
 from collections import Iterable, namedtuple
 
-from .helpers import PY2
-
-
 __all__ = [
+    'DeviceAddress',
     'HexArray',
     'HexByte',
     'HexWord',
-    'IPAddress',
 ]
 
 
