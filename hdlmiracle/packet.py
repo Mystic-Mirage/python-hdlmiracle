@@ -27,6 +27,12 @@ DEFAULT_DEVICE_ID = 0xbb
 DEFAULT_DEVICE_TYPE = 0xdddd
 DEFAULT_IPADDRESS = '127.0.0.1'
 
+CREEPYFROG = 'CREEPYFROG'
+HDLMIRACLE = 'HDLMIRACLE'
+SMARTCLOUD = 'SMARTCLOUD'
+
+HEADS = [HDLMIRACLE, SMARTCLOUD]
+
 START_CODE = b'\xaa\xaa'
 
 
@@ -213,13 +219,6 @@ class Head(str):
 
     def __repr__(self):
         return repr(self.strip())
-
-
-CREEPYFROG = 'CREEPYFROG'
-HDLMIRACLE = 'HDLMIRACLE'
-SMARTCLOUD = 'SMARTCLOUD'
-
-HEADS = [HDLMIRACLE, SMARTCLOUD]
 
 
 class IPAddress(bytearray):
