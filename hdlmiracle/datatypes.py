@@ -1,7 +1,5 @@
 from collections import Iterable, namedtuple
 
-from ipaddress import AddressValueError, IPv4Address
-
 from .helpers import PY2
 
 
@@ -107,22 +105,3 @@ class HexWord(HexByte):
 
     def __iter__(self):
         return iter(map(HexByte, divmod(self, 0x100)))
-
-
-class IPAddress(IPv4Address):
-
-    def __init__(self, address):
-        if PY2 and isinstance(address, str):
-            try:
-                self._check_packed_address(address, 4)
-            except AddressValueError:
-                address = unicode(address)
-        if isinstance(address, bytearray):
-            address = bytes(address)
-        IPv4Address.__init__(self, address)
-
-    def __iter__(self):
-        return iter(self.packed)
-
-    def __repr__(self):
-        return "'{0}'".format(str(self))

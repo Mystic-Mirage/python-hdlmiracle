@@ -1,7 +1,7 @@
 from collections import Iterable, OrderedDict
 
-from .datatypes import DeviceAddress, HexArray, HexByte, HexWord, IPAddress
-from .exceptions import HDLMiraclePacketException
+from .datatypes import DeviceAddress, HexArray, HexByte, HexWord
+from .exceptions import HDLMiracleIPAddressException, HDLMiraclePacketException
 from .helpers import PY3, Property, ReprMixin
 from .operationcodes import SEARCH
 
@@ -220,6 +220,25 @@ HDLMIRACLE = 'HDLMIRACLE'
 SMARTCLOUD = 'SMARTCLOUD'
 
 HEADS = [HDLMIRACLE, SMARTCLOUD]
+
+
+class IPAddress(bytearray):
+
+    def __init__(self, address):
+        if isinstance(address, str):
+            try:
+                address = [int(o) for o in address.split('.')]
+            except ValueError:
+                pass
+        if len(address) != 4:
+            raise HDLMiracleIPAddressException('Cannot parse an IP Address')
+        bytearray.__init__(self, address)
+
+    def __repr__(self):
+        return repr(str(self))
+
+    def __str__(self):
+        return '.'.join([str(o) for o in self])
 
 
 class IPPacket(Packet):

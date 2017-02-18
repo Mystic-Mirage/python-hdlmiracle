@@ -1,6 +1,6 @@
 import unittest
 
-from hdlmiracle.datatypes import HexArray, HexByte, HexWord, IPAddress
+from hdlmiracle.datatypes import HexArray, HexByte, HexWord
 
 
 class TestHexArray(unittest.TestCase):
@@ -83,29 +83,6 @@ class TestHexWord(unittest.TestCase):
         ba = bytearray()
         ba.extend(w)
         self.assertEqual(ba, b'\x00\x64')
-
-
-class TestIPAddress(unittest.TestCase):
-    str_ip = '10.11.12.13'
-    bytes_ip = b'\x0a\x0b\x0c\x0d'
-
-    def test_from_iterable(self):
-        ip = IPAddress(self.bytes_ip)
-        self.assertEqual(ip, IPAddress(self.str_ip))
-
-    def test_repr(self):
-        ip = IPAddress(self.str_ip)
-        self.assertEqual(repr(ip), repr(self.str_ip))
-
-    def test_str(self):
-        ip = IPAddress(self.str_ip)
-        self.assertEqual(str(ip), self.str_ip)
-
-    def test_to_iterable(self):
-        ip = IPAddress(self.str_ip)
-        ba = bytearray()
-        ba.extend(ip)
-        self.assertEqual(ba, self.bytes_ip)
 
 
 if __name__ == '__main__':
