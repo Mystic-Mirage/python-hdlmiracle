@@ -139,6 +139,9 @@ class IPAddress(bytearray):
             raise HDLMiracleIPAddressError('Cannot parse an IP Address')
         bytearray.__init__(self, address)
 
+    def __eq__(self, other):
+        return bytearray.__eq__(self, IPAddress(other))
+
     def __repr__(self):
         return repr(str(self))
 

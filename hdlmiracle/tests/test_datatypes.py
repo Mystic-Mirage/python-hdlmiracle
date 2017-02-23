@@ -90,6 +90,10 @@ class TestIPAddress(unittest.TestCase):
     str_ip = '10.11.12.13'
     bytes_ip = b'\x0a\x0b\x0c\x0d'
 
+    def test_equal(self):
+        ip = IPAddress(self.str_ip)
+        self.assertEqual(ip, self.str_ip)
+
     def test_from_bytes(self):
         ip = IPAddress(self.bytes_ip)
         self.assertEqual(ip, IPAddress(self.str_ip))
