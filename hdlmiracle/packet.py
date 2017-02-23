@@ -158,7 +158,8 @@ class Packet(ReprMixin):
         _dict['target_subnet_id'] = self.target_subnet_id
         _dict['target_device_id'] = self.target_device_id
         _dict['content'] = self.content
-        _dict['big'] = self.big
+        if self.big:
+            _dict['big'] = self.big
         return _dict
 
     @property
