@@ -1,5 +1,8 @@
 from collections import Iterable, namedtuple
 
+from .helpers import PY3
+
+
 __all__ = [
     'DeviceAddress',
     'HexArray',
@@ -14,7 +17,7 @@ DeviceAddress = namedtuple('DeviceAddress', ['subnet_id', 'device_id'])
 class HexArray(bytearray):
 
     def __init__(self, x=0):
-        if isinstance(x, str):
+        if PY3 and isinstance(x, str):
             bytearray.__init__(self, x, 'latin-1')
         elif isinstance(x, Iterable):
             l = []
