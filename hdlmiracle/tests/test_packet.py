@@ -1,6 +1,6 @@
 import unittest
 
-from hdlmiracle.exceptions import HDLMiraclePacketException
+from hdlmiracle.exceptions import HDLMiraclePacketError
 from hdlmiracle.packet import Head, IPAddress, IPPacket, Packet
 
 
@@ -62,7 +62,7 @@ class TestPacket(unittest.TestCase):
         self.assertEqual(packet1, packet2)
 
     def test_wrong(self):
-        with self.assertRaises(HDLMiraclePacketException):
+        with self.assertRaises(HDLMiraclePacketError):
             Packet(b'!wrong!')
 
 

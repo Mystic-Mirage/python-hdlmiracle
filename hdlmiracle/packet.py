@@ -8,7 +8,7 @@ from .datatypes import (
     HexWord,
     IPAddress,
 )
-from .exceptions import HDLMiraclePacketException
+from .exceptions import HDLMiraclePacketError
 from .helpers import PY3, Property, ReprMixin
 from .operationcodes import SEARCH
 
@@ -88,7 +88,7 @@ class Packet(ReprMixin):
             self.content = content
             self.big = big
         except ValueError:
-            raise HDLMiraclePacketException('Error in packet data')
+            raise HDLMiraclePacketError('Error in packet data')
         return self
 
     @classmethod
@@ -97,7 +97,7 @@ class Packet(ReprMixin):
         packet = bytearray(data)
         packet_start = packet[:2]
         if packet_start != START_CODE:
-            raise HDLMiraclePacketException('Not a SmartBus packet')
+            raise HDLMiraclePacketError('Not a SmartBus packet')
         self.big = packet[2] > 128
         self.subnet_id = packet[3]
         self.device_id = packet[4]
@@ -114,13 +114,13 @@ class Packet(ReprMixin):
             packet_checksum = HexWord(packet[packet_length:packet_length+2])
             checksum = self.checksum
             if packet_checksum != checksum:
-                raise HDLMiraclePacketException(
+                raise HDLMiraclePacketError(
                     'Wrong checksum ({0}). '
                     'Expected {1}'.format(packet_checksum, checksum)
                 )
         length = self.length
         if packet_length != length:
-            raise HDLMiraclePacketException(
+            raise HDLMiraclePacketError(
                 'Wrong packet length ({0}). '
                 'Expected value is {1}'.format(packet_length, length)
             )
@@ -242,7 +242,7 @@ class IPPacket(Packet):
             self.ipaddress = ipaddress
             self.head = head
         except ValueError:
-            raise HDLMiraclePacketException('Error in packet data')
+            raise HDLMiraclePacketError('Error in packet data')
         return self
 
     def dict(self):

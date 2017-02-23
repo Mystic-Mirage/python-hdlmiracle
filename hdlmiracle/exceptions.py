@@ -6,7 +6,7 @@ class HDLMiracleBusException(HDLMiracleException):
     pass
 
 
-class HDLMiracleIPAddressException(HDLMiracleException):
+class HDLMiracleIPAddressError(HDLMiracleException):
     pass
 
 
@@ -14,5 +14,5 @@ class HDLMiracleIPBusException(HDLMiracleBusException):
     pass
 
 
-class HDLMiraclePacketException(HDLMiracleException):
+class HDLMiraclePacketError(HDLMiracleException):
     pass

@@ -1,6 +1,6 @@
 from collections import Iterable, namedtuple
 
-from .exceptions import HDLMiracleIPAddressException
+from .exceptions import HDLMiracleIPAddressError
 from .helpers import PY3
 
 
@@ -136,7 +136,7 @@ class IPAddress(bytearray):
             except ValueError:
                 pass
         if len(address) != 4:
-            raise HDLMiracleIPAddressException('Cannot parse an IP Address')
+            raise HDLMiracleIPAddressError('Cannot parse an IP Address')
         bytearray.__init__(self, address)
 
     def __repr__(self):

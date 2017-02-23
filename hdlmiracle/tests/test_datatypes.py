@@ -1,7 +1,7 @@
 import unittest
 
 from hdlmiracle.datatypes import HexArray, HexByte, HexWord, IPAddress
-from hdlmiracle.exceptions import HDLMiracleIPAddressException
+from hdlmiracle.exceptions import HDLMiracleIPAddressError
 
 
 class TestHexArray(unittest.TestCase):
@@ -109,17 +109,17 @@ class TestIPAddress(unittest.TestCase):
         self.assertEqual(ba, self.bytes_ip)
 
     def test_wrong_byte_length(self):
-        with self.assertRaises(HDLMiracleIPAddressException):
+        with self.assertRaises(HDLMiracleIPAddressError):
             IPAddress(b'\x0a\x0b\x0c')
-        with self.assertRaises(HDLMiracleIPAddressException):
+        with self.assertRaises(HDLMiracleIPAddressError):
             IPAddress(b'\x0a\x0b\x0c\x0d\x0e')
 
     def test_wrong_str_length(self):
-        with self.assertRaises(HDLMiracleIPAddressException):
+        with self.assertRaises(HDLMiracleIPAddressError):
             IPAddress('1234')
-        with self.assertRaises(HDLMiracleIPAddressException):
+        with self.assertRaises(HDLMiracleIPAddressError):
             IPAddress('10.11.12')
-        with self.assertRaises(HDLMiracleIPAddressException):
+        with self.assertRaises(HDLMiracleIPAddressError):
             IPAddress('10.11.12.13.14')
 
 
