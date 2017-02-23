@@ -1,7 +1,14 @@
 from collections import Iterable, OrderedDict
 
-from .datatypes import DeviceAddress, HexArray, HexByte, HexWord
-from .exceptions import HDLMiracleIPAddressException, HDLMiraclePacketException
+from .datatypes import (
+    DeviceAddress,
+    Head,
+    HexArray,
+    HexByte,
+    HexWord,
+    IPAddress,
+)
+from .exceptions import HDLMiraclePacketException
 from .helpers import PY3, Property, ReprMixin
 from .operationcodes import SEARCH
 
@@ -200,42 +207,6 @@ class Packet(ReprMixin):
     def __str__(self):
         data = bytearray(self)
         return str(data, 'latin-1') if PY3 else str(data)
-
-
-class Head(str):
-
-    def __new__(cls, x):
-        x = x[:10].ljust(10)
-        isinstance(x, str) and x.encode('latin-1')
-        if PY3 and isinstance(x, (bytearray, bytes)):
-            x = str(x, 'latin-1')
-        self = str.__new__(cls, x)
-        return self
-
-    def __iter__(self):
-        return iter(self.encode('latin-1'))
-
-    def __repr__(self):
-        return repr(self.strip())
-
-
-class IPAddress(bytearray):
-
-    def __init__(self, address):
-        if isinstance(address, str):
-            try:
-                address = [int(o) for o in address.split('.')]
-            except ValueError:
-                pass
-        if len(address) != 4:
-            raise HDLMiracleIPAddressException('Cannot parse an IP Address')
-        bytearray.__init__(self, address)
-
-    def __repr__(self):
-        return repr(str(self))
-
-    def __str__(self):
-        return '.'.join([str(o) for o in self])
 
 
 class IPPacket(Packet):

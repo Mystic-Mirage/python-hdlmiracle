@@ -1,47 +1,7 @@
 import unittest
 
-from hdlmiracle.exceptions import (
-    HDLMiracleIPAddressException,
-    HDLMiraclePacketException,
-)
+from hdlmiracle.exceptions import HDLMiraclePacketException
 from hdlmiracle.packet import Head, IPAddress, IPPacket, Packet
-
-
-class TestIPAddress(unittest.TestCase):
-    str_ip = '10.11.12.13'
-    bytes_ip = b'\x0a\x0b\x0c\x0d'
-
-    def test_from_bytes(self):
-        ip = IPAddress(self.bytes_ip)
-        self.assertEqual(ip, IPAddress(self.str_ip))
-
-    def test_repr(self):
-        ip = IPAddress(self.str_ip)
-        self.assertEqual(repr(ip), repr(self.str_ip))
-
-    def test_str(self):
-        ip = IPAddress(self.str_ip)
-        self.assertEqual(str(ip), self.str_ip)
-
-    def test_to_iterable(self):
-        ip = IPAddress(self.str_ip)
-        ba = bytearray()
-        ba.extend(ip)
-        self.assertEqual(ba, self.bytes_ip)
-
-    def test_wrong_byte_length(self):
-        with self.assertRaises(HDLMiracleIPAddressException):
-            IPAddress(b'\x0a\x0b\x0c')
-        with self.assertRaises(HDLMiracleIPAddressException):
-            IPAddress(b'\x0a\x0b\x0c\x0d\x0e')
-
-    def test_wrong_str_length(self):
-        with self.assertRaises(HDLMiracleIPAddressException):
-            IPAddress('1234')
-        with self.assertRaises(HDLMiracleIPAddressException):
-            IPAddress('10.11.12')
-        with self.assertRaises(HDLMiracleIPAddressException):
-            IPAddress('10.11.12.13.14')
 
 
 class TestIPPacket(unittest.TestCase):

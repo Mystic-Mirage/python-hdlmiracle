@@ -1,17 +1,37 @@
 from collections import Iterable, namedtuple
 
+from .exceptions import HDLMiracleIPAddressException
 from .helpers import PY3
 
 
 __all__ = [
     'DeviceAddress',
+    'Head',
     'HexArray',
     'HexByte',
     'HexWord',
+    'IPAddress',
 ]
 
 
 DeviceAddress = namedtuple('DeviceAddress', ['subnet_id', 'device_id'])
+
+
+class Head(str):
+
+    def __new__(cls, x):
+        x = x[:10].ljust(10)
+        isinstance(x, str) and x.encode('latin-1')
+        if PY3 and isinstance(x, (bytearray, bytes)):
+            x = str(x, 'latin-1')
+        self = str.__new__(cls, x)
+        return self
+
+    def __iter__(self):
+        return iter(self.encode('latin-1'))
+
+    def __repr__(self):
+        return repr(self.strip())
 
 
 class HexArray(bytearray):
@@ -105,3 +125,22 @@ class HexWord(HexByte):
 
     def __iter__(self):
         return iter(map(HexByte, divmod(self, 0x100)))
+
+
+class IPAddress(bytearray):
+
+    def __init__(self, address):
+        if isinstance(address, str):
+            try:
+                address = [int(o) for o in address.split('.')]
+            except ValueError:
+                pass
+        if len(address) != 4:
+            raise HDLMiracleIPAddressException('Cannot parse an IP Address')
+        bytearray.__init__(self, address)
+
+    def __repr__(self):
+        return repr(str(self))
+
+    def __str__(self):
+        return '.'.join([str(o) for o in self])
