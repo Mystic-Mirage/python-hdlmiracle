@@ -20,8 +20,6 @@ __all__ = [
 ALL_NETWORKS = 0xff
 ALL_DEVICES = 0xff
 
-BIG_FLAG = 0xff
-
 DEFAULT_SUBNET_ID = 0xbb
 DEFAULT_DEVICE_ID = 0xbb
 DEFAULT_DEVICE_TYPE = 0xdddd
@@ -93,7 +91,7 @@ class Packet(ReprMixin):
         packet_start = packet[:2]
         if packet_start != START_CODE:
             raise HDLMiraclePacketException('Not a SmartBus packet')
-        self.big = packet[2] == BIG_FLAG
+        self.big = packet[2] > 128
         self.subnet_id = packet[3]
         self.device_id = packet[4]
         self.device_type = packet[5:7]
@@ -102,11 +100,11 @@ class Packet(ReprMixin):
         self.target_device_id = packet[10]
         if self.big:
             packet_length = HexWord(packet[11:13])
-            self.content = packet[13:]
+            self.content = packet[13:packet_length+11]
         else:
             packet_length = packet[2]
-            self.content = packet[11:-2]
-            packet_checksum = HexWord(packet[-2:])
+            self.content = packet[11:packet_length]
+            packet_checksum = HexWord(packet[packet_length:packet_length+2])
             checksum = self.checksum
             if packet_checksum != checksum:
                 raise HDLMiraclePacketException(
@@ -186,7 +184,7 @@ class Packet(ReprMixin):
     def __iter__(self):
         data = HexArray([
             START_CODE,
-            BIG_FLAG if self.big else self.length,
+            0xff if self.big else self.length,
             self.subnet_id,
             self.device_id,
             self.device_type,
