@@ -1,3 +1,4 @@
+from binascii import crc_hqx
 from collections import Iterable, OrderedDict
 
 from .datatypes import (
@@ -39,19 +40,6 @@ SMARTCLOUD = 'SMARTCLOUD'
 HEADS = [HDLMIRACLE, SMARTCLOUD]
 
 START_CODE = b'\xaa\xaa'
-
-
-def _checksum(data):
-    checksum = 0
-    for i in data:
-        checksum ^= i << 8
-        for _ in range(8):
-            if (checksum & 0x8000) > 0:
-                checksum = (checksum << 1) ^ 0x1021
-            else:
-                checksum <<= 1
-        checksum &= 0xffff
-    return checksum
 
 
 class Packet(ReprMixin):
@@ -147,7 +135,7 @@ class Packet(ReprMixin):
             self.target_device_id,
             self.content,
         ])
-        return HexWord(_checksum(data))
+        return HexWord(crc_hqx(data, 0))
 
     def dict(self):
         _dict = OrderedDict()
