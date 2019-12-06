@@ -30,11 +30,11 @@ class DeviceSet(object):
                 self.add(device)
 
     def _set_control(self, action, device):
-        for network_id in [device.subnet_id, ALL_NETWORKS]:
+        for subnet_id in [device.subnet_id, ALL_NETWORKS]:
             for device_id in [device.device_id, ALL_DEVICES]:
-                _set = self._devices[network_id, device_id]
+                devices = self._devices[subnet_id, device_id]
                 try:
-                    getattr(_set, action)(device)
+                    getattr(devices, action)(device)
                 except (AttributeError, KeyError):
                     pass
 
@@ -48,7 +48,12 @@ class DeviceSet(object):
         return set(self) == set(other)
 
     def __getitem__(self, y):
-        return self._devices[y]
+        target_subnet_id, target_device_id = y
+        devices = set()
+        for subnet_id in [target_subnet_id, ALL_NETWORKS]:
+            for device_id in [target_device_id, ALL_DEVICES]:
+                devices |= self._devices[(subnet_id, device_id)]
+        return devices
 
     def __iter__(self):
         return iter(self[ALL_NETWORKS, ALL_DEVICES])
